@@ -1,491 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BruNow - AI Brunei Travel Assistant</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Instrument Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Instrument Sans', 'sans-serif'],
-          },
-          colors: {
-            darkBg: '#252B29',
-            cardDark: '#2C3330',
-            userBubble: '#EFEBE3',
-            sageGreen: '#6E9183',
-            goldAccent: '#F7CD4F',
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: 'Instrument Sans', sans-serif;
-      background-color: #1A1F1D;
-      user-select: none;
-    }
-
-    /* Scrollbar styling */
-    .scrollbar-none::-webkit-scrollbar {
-      display: none;
-    }
-    .scrollbar-none {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Custom chat bubble animation */
-    .chat-enter {
-      animation: fadeInUp 0.25s ease-out forwards;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .typing-dot {
-      animation: typingBounce 1.4s infinite ease-in-out both;
-    }
-    .typing-dot:nth-child(1) { animation-delay: 0s; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingBounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-  </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-2 sm:p-6">
-
-  <div class="relative w-full max-w-[430px] h-[932px] bg-darkBg rounded-[48px] shadow-2xl overflow-hidden border-[8px] border-[#111614] flex flex-col text-white">
-    
-    <!-- Camera Island Notch -->
-    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-4 bg-black rounded-full z-50 flex items-center justify-center gap-2">
-      <div class="w-2.5 h-2.5 bg-[#111] rounded-full"></div>
-      <div class="w-1.5 h-1.5 bg-[#0a192f] rounded-full"></div>
-    </div>
-
-    <header class="relative w-full h-[70px] pt-6 px-5 flex items-center justify-between border-b border-white/10 shrink-0 bg-darkBg/90 backdrop-blur-md z-40">
-      <button id="back-btn" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
-        </svg>
-      </button>
-
-      <!-- BruNow Logo & Mascot -->
-      <div class="flex items-center gap-2">
-        <div class="relative w-9 h-9 rounded-full bg-amber-100/10 border border-amber-300/30 flex items-center justify-center overflow-hidden">
-          <span class="text-xl">🦜</span>
-        </div>
-        <div class="flex items-center">
-          <span class="text-xl font-bold tracking-tight text-amber-400">Bru</span>
-          <span class="text-xl font-bold tracking-tight text-white">Now</span>
-        </div>
-      </div>
-
-      <!-- Settings / Reset Button -->
-      <button id="reset-chat-btn" title="Reset Chat" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
-    </header>
-
-    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none">
-      
-      <!-- Bot Initial Welcome Message -->
-      <div class="chat-enter flex flex-col items-start gap-1 max-w-[90%]">
-        <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 space-y-3">
-          <p>Hi! 👋 I'd be happy to help you explore Brunei.</p>
-          <p class="text-gray-300">Before I create your itinerary, could you tell me a little more?</p>
-          
-          <ul class="text-xs text-gray-300 space-y-1 list-none pl-1">
-            <li class="flex items-center gap-1.5">📍 Where are you staying?</li>
-            <li class="flex items-center gap-1.5">🚗 Do you have your own transport?</li>
-            <li class="flex items-center gap-1.5">💰 What's your budget?</li>
-            <li class="flex items-center gap-1.5">🌿 What are you interested in?</li>
-          </ul>
-
-          <div class="pt-1">
-            <p class="text-xs text-gray-400 mb-2">You can also choose one of these tags:</p>
-            <div class="flex flex-wrap gap-1.5">
-              <button onclick="sendQuickPrompt('Tell me about Culture & Mosques in Bandar')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
-                🏛️ Culture
-              </button>
-              <button onclick="sendQuickPrompt('I want Nature & Eco adventures')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
-                🌿 Nature
-              </button>
-              <button onclick="sendQuickPrompt('Recommend local Food like Ambuyat')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
-                🍽️ Food
-              </button>
-              <button onclick="sendQuickPrompt('Where to go Shopping in Brunei')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
-                🛍️ Shopping
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
-
-    <div id="typing-indicator" class="hidden px-5 py-2 flex items-center gap-2 text-xs text-gray-400">
-      <div class="w-6 h-6 rounded-full bg-amber-100/10 flex items-center justify-center text-xs">🦜</div>
-      <span>BruNow is crafting your Brunei plan...</span>
-      <div class="flex gap-1 ml-1">
-        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
-        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
-        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
-      </div>
-    </div>
-
-    <footer class="p-3 bg-darkBg border-t border-white/10 shrink-0">
-      
-      <!-- Quick Suggestion Pill Bar -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
-        <button onclick="sendQuickPrompt('Can you generate me 1 day itinerary?')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
-          ✨ 1 Day Itinerary
-        </button>
-        <button onclick="sendQuickPrompt('Top local dishes to try in Brunei')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
-          🍱 Best Food & Ambuyat
-        </button>
-        <button onclick="sendQuickPrompt('How do I get to Kampong Ayer?')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
-          🚤 Water Village Tour
-        </button>
-      </div>
-
-      <!-- Text Input Form -->
-      <form id="chat-form" class="flex items-center gap-2 mt-1">
-        <input 
-          type="text" 
-          id="chat-input"
-          placeholder="Ask BruNow about Brunei trip..."
-          class="flex-1 h-11 px-4 bg-cardDark text-sm text-white placeholder-gray-400 rounded-full outline-none border border-white/10 focus:border-amber-400/50 transition-all"
-        />
-        <button 
-          type="submit"
-          id="send-btn"
-          class="w-11 h-11 bg-sageGreen hover:bg-[#5b7d70] rounded-full flex items-center justify-center shrink-0 shadow-lg active:scale-95 transition-all"
-        >
-          <svg class="w-5 h-5 text-white transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7" />
-          </svg>
-        </button>
-      </form>
-    </footer>
-
-    <!-- Notification Toast Container -->
-    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-950 font-medium text-xs px-4 py-2 rounded-full shadow-2xl z-50 transition-all">
-      Saved to Planner!
-    </div>
-
+<div style="width: 430px; height: 932px; position: relative; background: #303735; overflow: hidden; border-radius: 8px">
+  <div style="width: 430px; height: 932px; left: 0px; top: 0px; position: absolute"></div>
+  <div style="width: 36px; height: 30px; left: 56px; top: 57px; position: absolute; transform: rotate(180deg); transform-origin: top left; overflow: hidden">
+    <div style="width: 10.61px; height: 16.68px; left: 4.50px; top: 6.66px; position: absolute; background: white"></div>
+    <div style="width: 26.75px; height: 1.50px; left: 4.75px; top: 14.25px; position: absolute; background: white"></div>
   </div>
-
-  <script>
-    // System instruction defining BruNow's Brunei specialized persona
-    const BRUNEI_SYSTEM_INSTRUCTION = `You are "BruNow", the official AI Travel Concierge for Brunei Darussalam.
-Your sole focus is helping travelers discover Brunei's rich culture, eco-tourism, halal cuisine, and royal heritage.
-
-Expert Knowledge Base:
-- Attractions: Sultan Omar Ali Saifuddien Mosque, Kampong Ayer (water village), Royal Regalia Museum, Jame' 'Asr Hassanil Bolkiah Mosque, Ulu Temburong National Park (Canopy Walk), Gadong Night Market, Empire Brunei resort, Tasek Lama Recreational Park, Mangrove River Safari (proboscis monkeys).
-- Local Gastronomy: Ambuyat (sago dish with cacah dip), Udang Galah (giant freshwater prawns), Soto Pabo, Nasi Katok, Pulut Panggang, Kuih Cincin, Mr Baker's Cafe, Aminah Arif Restaurant.
-- Logistics: Currency (BND / SGD parity), DART ride-hailing app, Water Taxis (Penambang), polite dress codes for mosques.
-
-Formatting Requirement for Itineraries / Recommendations:
-When generating an itinerary or day plan, ALWAYS include a JSON block formatted exactly like this inside markdown:
-\`\`\`json
-{
-  "isItinerary": true,
-  "title": "1-Day Nature & Food Adventure",
-  "startingPoint": "Bandar Seri Begawan",
-  "schedule": [
-    {
-      "time": "8:30 AM",
-      "category": "Breakfast",
-      "place": "Mr Baker's Cafe",
-      "details": []
-    },
-    {
-      "time": "10:00 AM",
-      "category": "Nature",
-      "place": "Ulu Temburong National Park",
-      "details": ["Canopy Walk", "River Cruise"],
-      "estimatedStay": "3 hours"
-    },
-    {
-      "time": "2:00 PM",
-      "category": "Lunch",
-      "place": "Aminah Arif",
-      "recommended": ["Ambuyat", "Udang Galah"]
-    }
-  ]
-}
-\`\`\`
-For general questions, give polite, friendly, natural text answers. Keep descriptions enthusiastic and welcoming!`;
-
-    // Global conversation state
-    const chatHistory = [];
-    
-    const chatContainer = document.getElementById('chat-container');
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const typingIndicator = document.getElementById('typing-indicator');
-    const toast = document.getElementById('toast');
-
-    function showToast(message) {
-      toast.textContent = message;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 2500);
-    }
-
-    function scrollToBottom() {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    // Render User Chat Bubble
-    function appendUserMessage(text) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-enter flex justify-end w-full';
-      msgDiv.innerHTML = `
-        <div class="bg-userBubble text-gray-900 text-[14px] leading-relaxed py-2.5 px-4 rounded-2xl rounded-tr-none max-w-[85%] shadow-md">
-          ${escapeHtml(text)}
-        </div>
-      `;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-    }
-
-    // Render Bot Text or Green Itinerary Card
-    function appendBotMessage(parsedContent) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-enter flex flex-col items-start gap-1 max-w-[95%]';
-
-      let contentHtml = '';
-
-      if (parsedContent.textBefore) {
-        contentHtml += `<p class="text-[14px] text-gray-200 leading-relaxed mb-3">${escapeHtml(parsedContent.textBefore)}</p>`;
-      }
-
-      // If JSON Itinerary exists, render the Figma Sage Green Card
-      if (parsedContent.itinerary) {
-        const itin = parsedContent.itinerary;
-        contentHtml += `
-          <div class="w-full bg-sageGreen text-white rounded-2xl p-4 shadow-xl border border-white/20 space-y-3 font-sans">
-            
-            <!-- Card Header -->
-            <div class="border-b border-white/20 pb-2">
-              <div class="flex items-center gap-1.5 text-xs text-amber-200 font-medium mb-0.5">
-                <span>🌿</span>
-                <span>${escapeHtml(itin.title || 'Brunei Itinerary')}</span>
-              </div>
-              <div class="text-xs text-gray-100 flex items-center gap-1">
-                <span class="text-amber-300">📍</span>
-                <span>Starting Point: ${escapeHtml(itin.startingPoint || 'Bandar Seri Begawan')}</span>
-              </div>
-            </div>
-
-            <!-- Schedule Items List -->
-            <div class="space-y-3 pt-1">
-              ${(itin.schedule || []).map(item => `
-                <div class="space-y-1 text-xs border-b border-white/10 pb-2.5 last:border-0 last:pb-0">
-                  <div class="flex items-center justify-between text-amber-200 font-semibold">
-                    <span>${escapeHtml(item.time)}</span>
-                    ${item.estimatedStay ? `<span class="text-[10px] bg-white/15 px-2 py-0.5 rounded-full text-white">Stay: ${escapeHtml(item.estimatedStay)}</span>` : ''}
-                  </div>
-                  <div class="text-sm font-medium text-white flex items-center gap-1.5">
-                    <span>${getCategoryIcon(item.category)}</span>
-                    <span>${escapeHtml(item.place)}</span>
-                  </div>
-                  
-                  ${item.details && item.details.length ? `
-                    <ul class="pl-4 space-y-0.5 text-gray-100 list-disc">
-                      ${item.details.map(d => `<li>${escapeHtml(d)}</li>`).join('')}
-                    </ul>
-                  ` : ''}
-
-                  ${item.recommended && item.recommended.length ? `
-                    <div class="pt-1 text-[11px] text-amber-100">
-                      <span class="font-medium text-amber-300">Recommended:</span>
-                      <span class="text-gray-100">${item.recommended.join(', ')}</span>
-                    </div>
-                  ` : ''}
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- Add to Planner Action -->
-            <div class="pt-2 border-t border-white/20 flex justify-end">
-              <button 
-                onclick="saveItineraryToPlanner()"
-                class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-gray-950 text-xs font-semibold rounded-lg shadow transition-all active:scale-95 flex items-center gap-1"
-              >
-                <span>➕ Save to My Itinerary</span>
-              </button>
-            </div>
-
-          </div>
-        `;
-      }
-
-      if (parsedContent.textAfter) {
-        contentHtml += `<p class="text-[14px] text-gray-200 leading-relaxed mt-3">${escapeHtml(parsedContent.textAfter)}</p>`;
-      }
-
-      msgDiv.innerHTML = `
-        <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 w-full">
-          ${contentHtml}
-        </div>
-      `;
-
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-    }
-
-    function getCategoryIcon(category) {
-      if (!category) return '📍';
-      const cat = category.toLowerCase();
-      if (cat.includes('breakfast') || cat.includes('lunch') || cat.includes('food') || cat.includes('dinner')) return '🍽️';
-      if (cat.includes('nature') || cat.includes('park') || cat.includes('river')) return '🌳';
-      if (cat.includes('culture') || cat.includes('mosque') || cat.includes('museum')) return '🕌';
-      if (cat.includes('shop')) return '🛍️';
-      return '📌';
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    // Call Gemini 3 Flash API with retry and backoff
-    async function callGeminiAPI(userQuery) {
-      chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
-
-      const apiKey = ""; // Runtime automatically inserts API key when empty
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: chatHistory,
-        systemInstruction: {
-          parts: [{ text: BRUNEI_SYSTEM_INSTRUCTION }]
-        }
-      };
-
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        try {
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) {
-            throw new Error(`API Error ${response.status}`);
-          }
-
-          const data = await response.json();
-          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't fetch that right now. Please try again!";
-
-          // Add model response to history
-          chatHistory.push({ role: "model", parts: [{ text: responseText }] });
-
-          return parseGeminiResponse(responseText);
-        } catch (err) {
-          attempts++;
-          if (attempts >= maxAttempts) {
-            return {
-              textBefore: "Sorry, I had trouble connecting to BruNow AI servers. Please check your network and try again!"
-            };
-          }
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts)));
-        }
-      }
-    }
-
-    // Parse JSON block out of response if present
-    function parseGeminiResponse(text) {
-      const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-      if (jsonMatch && jsonMatch[1]) {
-        try {
-          const parsedJson = JSON.parse(jsonMatch[1]);
-          const parts = text.split(/```json[\s\S]*?```/);
-          return {
-            textBefore: parts[0]?.trim(),
-            itinerary: parsedJson,
-            textAfter: parts[1]?.trim()
-          };
-        } catch (e) {
-          // Fallback if JSON parse fails
-        }
-      }
-      return { textBefore: text };
-    }
-
-    // Handle user input submit
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const query = chatInput.value.trim();
-      if (!query) return;
-
-      chatInput.value = '';
-      appendUserMessage(query);
-
-      typingIndicator.classList.remove('hidden');
-      scrollToBottom();
-
-      const botResult = await callGeminiAPI(query);
-
-      typingIndicator.classList.add('hidden');
-      appendBotMessage(botResult);
-    });
-
-    window.sendQuickPrompt = function(promptText) {
-      chatInput.value = promptText;
-      chatForm.dispatchEvent(new Event('submit'));
-    };
-
-    window.saveItineraryToPlanner = function() {
-      showToast("Saved to your Brunei Itinerary Planner!");
-    };
-
-    document.getElementById('reset-chat-btn').addEventListener('click', () => {
-      chatHistory.length = 0;
-      chatContainer.innerHTML = `
-        <div class="chat-enter flex flex-col items-start gap-1 max-w-[90%]">
-          <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 space-y-3">
-            <p>Hi! 👋 Chat history reset. How can I help with your Brunei trip?</p>
-          </div>
-        </div>
-      `;
-      showToast("Chat reset");
-    });
-  </script>
-</body>
-</html>
+  <div style="width: 317px; height: 39px; left: 10px; top: 853px; position: absolute; background: #F5F5F5; border-radius: 16px"></div>
+  <div style="width: 35px; height: 33px; left: 14px; top: 856px; position: absolute; background: #E3E3E3; box-shadow: -1px 1px 0px rgba(0, 0, 0, 0.05), 0px 1px 2.799999952316284px rgba(0, 0, 0, 0.25); border-radius: 13px"></div>
+  <div style="width: 30px; height: 29px; left: 17px; top: 858px; position: absolute; overflow: hidden">
+    <div style="width: 30px; height: 29px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 16.50px; height: 1.50px; left: 6.75px; top: 13.75px; position: absolute; background: #706D6D"></div>
+    <div style="width: 1.50px; height: 16px; left: 14.25px; top: 6.50px; position: absolute; background: #706D6D"></div>
+  </div>
+  <div style="width: 41px; height: 39px; left: 333px; top: 853px; position: absolute; background: linear-gradient(121deg, rgba(176, 221, 208, 0.20) 0%, rgba(73, 142, 121, 0.20) 100%), #98C2B5; border-radius: 16px"></div>
+  <div style="width: 41px; height: 39px; left: 381px; top: 853px; position: absolute; background: linear-gradient(90deg, rgba(176, 221, 208, 0.20) 0%, rgba(73.16, 142.21, 120.84, 0.20) 100%), #98C2B5; border-radius: 16px"></div>
+  <div style="width: 24px; height: 24px; left: 342px; top: 861px; position: absolute; overflow: hidden">
+    <div style="width: 24px; height: 24px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 19.52px; height: 20px; left: 2.24px; top: 2px; position: absolute; opacity: 0.40; background: white"></div>
+    <div style="width: 4.50px; height: 1.50px; left: 9.75px; top: 7.25px; position: absolute; background: white"></div>
+    <div style="width: 6.76px; height: 6.76px; left: 8.62px; top: 11.37px; position: absolute; background: white"></div>
+  </div>
+  <div style="width: 24px; height: 24px; left: 390px; top: 861px; position: absolute; overflow: hidden">
+    <div style="width: 24px; height: 24px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 15.64px; height: 12.89px; left: 4.18px; top: 9.11px; position: absolute; opacity: 0.40; background: white"></div>
+    <div style="width: 8.84px; height: 13.96px; left: 7.58px; top: 2px; position: absolute; background: white"></div>
+  </div>
+  <div style="width: 304px; height: 439px; left: 21px; top: 393px; position: absolute; background: #739C8F; box-shadow: -0.5px -0.5px 0px rgba(0, 0, 0, 0.05), 10px 10px 21.213199615478516px rgba(0, 0, 0, 0.05), 5.900829792022705px 5.900829792022705px 8.345029830932617px rgba(0, 0, 0, 0.19), 2.6582999229431152px 2.6582999229431152px 3.7594099044799805px rgba(0, 0, 0, 0.23), 1.2107199430465698px 1.2107199430465698px 1.7122199535369873px rgba(0, 0, 0, 0.25), 0.4445840120315552px 0.4445840120315552px 0.6287369728088379px rgba(0, 0, 0, 0.26), -1px -1px 1px rgba(0, 0, 0, 0.15) inset, 1px 1px 1px #98C2B5 inset; border-radius: 10px"></div>
+  <div style="width: 430px; height: 771px; left: 0px; top: 73px; position: absolute; border: 1px rgba(34, 34, 34, 0.08) solid"></div>
+  <div style="width: 214px; height: 31px; left: 209px; top: 84px; position: absolute; background: #F3EBE5; box-shadow: 10px 10px 21.213199615478516px rgba(0, 0, 0, 0.05), 5.900829792022705px 5.900829792022705px 8.345029830932617px rgba(0, 0, 0, 0.19), 2.6582999229431152px 2.6582999229431152px 3.7594099044799805px rgba(0, 0, 0, 0.23), 1.2107199430465698px 1.2107199430465698px 1.7122199535369873px rgba(0, 0, 0, 0.25), 0.4445840120315552px 0.4445840120315552px 0.6287369728088379px rgba(0, 0, 0, 0.26), -1px -1px 0px rgba(0, 0, 0, 0.10) inset, 1px 1px 1px #F5F5F5 inset; border-radius: 17px"></div>
+  <div style="width: 229px; height: 25px; left: 192px; top: 87px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">Can you generate me 1 day itinerary!</div>
+  <div style="width: 262px; height: 39px; left: 159px; top: 290px; position: absolute; background: #F3EBE5; box-shadow: 10px 10px 21.213199615478516px rgba(0, 0, 0, 0.05), 5.900829792022705px 5.900829792022705px 8.345029830932617px rgba(0, 0, 0, 0.19), 2.6582999229431152px 2.6582999229431152px 3.7594099044799805px rgba(0, 0, 0, 0.23), 1.2107199430465698px 1.2107199430465698px 1.7122199535369873px rgba(0, 0, 0, 0.25), 0.4445840120315552px 0.4445840120315552px 0.6287369728088379px rgba(0, 0, 0, 0.26), -1px -1px 0px rgba(0, 0, 0, 0.10) inset, 1px 1px 1px #F5F5F5 inset; border-radius: 17px"></div>
+  <div style="width: 229px; height: 25px; left: 173px; top: 297px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">Nature and food. I'm staying in Bandar and have a car.</div>
+  <img style="width: 88px; height: 34px; left: 171px; top: 34px; position: absolute" src="data:image/png;base64,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" />
+  <img style="width: 49px; height: 42px; left: 194px; top: 7px; position: absolute" src="data:image/png;base64,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" />
+  <div style="width: 351px; height: 157px; left: 24px; top: 112px; position: absolute; justify-content: center; display: flex; flex-direction: column"><span style="color: white; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">Hi! 👋 I'd be happy to help you explore Brunei.<br/>Before I create your itinerary, could you tell me a little more?<br/><br/></span><span style="color: white; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word"> 📍 Where are you staying?<br/> 🚗 Do you have your own transport?<br/> 💰 What's your budget?<br/> 🌿 What are you interested in?<br/></span><span style="color: white; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">You can also choose one of these:<br/>🕌 Culture 🌳 Nature 🍽 Food 🛍 Shopping</span></div>
+  <div style="width: 13px; height: 12px; left: 26px; top: 257px; position: absolute; overflow: hidden">
+    <div style="width: 13px; height: 12px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 8.40px; height: 7.75px; left: 0.68px; top: 3.63px; position: absolute; background: #739C8F"></div>
+    <div style="width: 8.40px; height: 7.75px; left: 3.93px; top: 0.63px; position: absolute; background: #739C8F"></div>
+  </div>
+  <div style="width: 13px; height: 12px; left: 42px; top: 257px; position: absolute; overflow: hidden">
+    <div style="width: 13px; height: 12px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 7.37px; height: 9.73px; left: 4.54px; top: 1.13px; position: absolute; background: #739C8F"></div>
+    <div style="width: 2.92px; height: 7.11px; left: 1.08px; top: 3.19px; position: absolute; background: #739C8F"></div>
+  </div>
+  <div style="width: 13px; height: 12px; left: 59px; top: 257px; position: absolute; overflow: hidden">
+    <div style="width: 13px; height: 12px; left: 0px; top: 0px; position: absolute; background: black"></div>
+    <div style="width: 7.37px; height: 9.73px; left: 1.08px; top: 1.13px; position: absolute; background: #739C8F"></div>
+    <div style="width: 2.92px; height: 7.11px; left: 9px; top: 1.70px; position: absolute; background: #739C8F"></div>
+  </div>
+  <div style="width: 13px; height: 12px; left: 75px; top: 257px; position: absolute; overflow: hidden">
+    <div style="width: 12.33px; height: 6.50px; left: 0.33px; top: 0.25px; position: absolute; background: #739C8F"></div>
+    <div style="width: 11.73px; height: 6.50px; left: 0.88px; top: 5.25px; position: absolute; opacity: 0.40; background: #739C8F"></div>
+  </div>
+  <div style="width: 369px; height: 13.57px; left: 26px; top: 357.25px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 12px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">Perfect! Based on your preferences, here's a suggested itinerary.</div>
+  <div style="width: 279px; height: 419px; left: 31px; top: 404px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 10px; font-family: Instrument Sans; font-weight: 400; word-wrap: break-word">🌿 1-Day Nature & Food Adventure
+  <br/>
+  <br/>📍 Starting Point
+  <br/>Bandar Seri Begawan
+  <br/>
+  <br/>────────────────────
+  <br/>
+  <br/>8:30 AM
+  <br/>☕ Breakfast
+  <br/>Mr Baker's Cafe
+  <br/>
+  <br/>────────────────────
+  <br/>
+  <br/>10:00 AM
+  <br/>🌳 Ulu Temburong National Park
+  <br/>
+  <br/>✔ Canopy Walk
+  <br/>✔ River Cruise
+  <br/>
+  <br/>Estimated Stay
+  <br/>3 hours
+  <br/>
+  <br/>────────────────────
+  <br/>
+  <br/>2:00 PM
+  <br/>🍽 Lunch
+  <br/>
+  <br/>Aminah Arif
+  <br/>
+  <br/>Recommended:
+  <br/>• Ambuyat
+  <br/>• Udang Galah
+  <br/>
+  <br/>───────────────────</div>
+</div>
