@@ -13,9 +13,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
     body {
       font-family: 'Instrument Sans', sans-serif;
@@ -56,7 +53,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6">
 
-  <!-- Mobile Device Outer Container -->
+  <!-- Mobile Device Outer Container (430px x 932px) -->
   <div class="relative w-full max-w-[430px] h-[932px] bg-[#C2E6DB] rounded-[48px] shadow-2xl overflow-hidden border-[8px] border-[#0F172A] flex flex-col">
     
     <!-- Camera Notch Dynamic Island Element -->
@@ -71,7 +68,9 @@
       <!-- Top Navigation Header -->
       <div class="relative w-full h-[50px] flex items-center justify-center px-6">
         <button id="back-btn-step1" class="absolute left-6 w-[36px] h-[30px] flex items-center justify-center hover:opacity-70 transition-opacity">
-          <i data-lucide="arrow-left" class="w-6 h-6 text-black"></i>
+          <svg class="w-6 h-6 text-black transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
         <span class="text-[18px] font-normal text-black tracking-wide">Itinerary</span>
       </div>
@@ -81,7 +80,7 @@
         
         <!-- Card 1: Create your Plans -->
         <div class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5]">
-          <h2 className="text-[24px] font-normal text-black text-2xl leading-tight">Create your Plans</h2>
+          <h2 class="text-[24px] font-normal text-black leading-tight">Create your Plans</h2>
           <p class="text-[15px] font-normal text-black mt-1 mb-4">Personalized for you.</p>
 
           <div class="space-y-[10px]">
@@ -104,25 +103,46 @@
                 class="w-full h-[36px] px-3 bg-[#EAEAEA] rounded-[4px] text-[15px] flex items-center justify-between text-left outline-none focus:ring-1 focus:ring-[#739C8F]"
               >
                 <span id="selected-date-text" class="text-black">15/01/26</span>
-                <i data-lucide="calendar" class="w-4 h-4 text-[#739C8F]"></i>
+                <svg class="w-4 h-4 text-[#739C8F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </button>
 
-              <!-- Interactive Popup Calendar Widget -->
+              <!-- Interactive Popup Calendar Widget with Year & Month Selection -->
               <div 
                 id="calendar-popup" 
-                class="hidden absolute left-0 top-[42px] z-50 w-[240px] bg-white rounded-[10px] p-3 shadow-2xl border border-[#E0E0E0]"
+                class="hidden absolute left-0 top-[42px] z-50 w-[250px] bg-white rounded-[10px] p-3 shadow-2xl border border-[#E0E0E0]"
               >
-                <!-- Calendar Header -->
-                <div class="flex items-center justify-between mb-2 px-1">
-                  <span id="cal-month-year" class="text-[12px] font-semibold text-black">
-                    January 1, 2026
-                  </span>
-                  <div class="flex items-center gap-1">
-                    <button id="cal-prev-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F] transition-colors">
-                      <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                <!-- Calendar Header with Month/Year Dropdowns -->
+                <div class="flex items-center justify-between mb-2 px-1 gap-1">
+                  <select id="cal-month-select" class="text-[12px] font-semibold text-black bg-[#F5F5F5] border border-gray-200 rounded px-1 py-0.5 outline-none cursor-pointer">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+
+                  <select id="cal-year-select" class="text-[12px] font-semibold text-black bg-[#F5F5F5] border border-gray-200 rounded px-1 py-0.5 outline-none cursor-pointer">
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                  </select>
+
+                  <div class="flex items-center gap-0.5 ml-auto">
+                    <button type="button" id="cal-prev-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F]">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
                     </button>
-                    <button id="cal-next-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F] transition-colors">
-                      <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    <button type="button" id="cal-next-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F]">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
                     </button>
                   </div>
                 </div>
@@ -190,7 +210,6 @@
           <h3 class="text-[24px] font-normal text-black mb-4">What do you like?</h3>
           <div class="space-y-3" id="preference-options">
             
-            <!-- Preferences list -->
             <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Nature">
               <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
                 <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
@@ -267,139 +286,186 @@
         >
           <span>Continue</span>
           <div class="w-4 h-4 rounded-full bg-white/40 flex items-center justify-center">
-            <i data-lucide="chevron-right" class="w-3 h-3 text-white stroke-[3]"></i>
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </div>
         </button>
       </div>
 
     </div>
 
-    <!-- ================= STEP 2: GENERATED ITINERARY VIEW ================= -->
+    <!-- ================= STEP 2: "NOW THE FUN PART" ITINERARY VIEW ================= -->
     <div id="step-2-view" class="hidden relative w-full h-full pt-[26px] bg-[#C2E6DB] flex-col">
       
-      <!-- Top Navigation Bar -->
-      <div class="px-6 flex items-center justify-between mb-4">
-        <button id="back-to-step1-btn" class="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition-colors">
-          <i data-lucide="arrow-left" class="w-5 h-5 text-black"></i>
+      <!-- Top Navigation Header -->
+      <div class="relative w-full h-[50px] flex items-center justify-center px-6 shrink-0">
+        <button id="back-to-step1-btn" class="absolute left-6 w-[36px] h-[30px] flex items-center justify-center hover:opacity-70 transition-opacity">
+          <svg class="w-6 h-6 text-black transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
-        <h1 class="text-lg font-medium text-black">Your Itinerary</h1>
-        <button id="share-btn" class="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition-colors">
-          <i data-lucide="share-2" class="w-4 h-4 text-black"></i>
-        </button>
+        <span class="text-[18px] font-normal text-black tracking-wide">Itinerary</span>
       </div>
 
-      <!-- Scrollable Itinerary Result Container -->
-      <div class="flex-1 overflow-y-auto px-5 pb-8 space-y-4 scrollbar-none">
+      <!-- Subtitle Title -->
+      <div class="px-[32px] pt-[10px] pb-[8px]">
+        <h2 class="text-[24px] font-normal text-black leading-tight">Now the fun part.</h2>
+      </div>
+
+      <!-- Main Step 2 Scrollable Container -->
+      <div class="flex-1 overflow-y-auto px-[20px] pb-[90px] scrollbar-none">
         
-        <!-- Summary Header Card -->
-        <div class="bg-white rounded-[24px] p-5 card-shadow border border-[#F5F5F5]">
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="inline-block px-3 py-1 bg-[#C2E6DB]/50 text-[#3c6c5e] text-xs font-semibold rounded-full mb-2">
-                Ready to Explore
-              </span>
-              <h2 id="result-trip-name" class="text-2xl font-bold text-gray-900">Tokyo Adventure</h2>
-            </div>
-            <i data-lucide="sparkles" class="w-6 h-6 text-[#739C8F]"></i>
-          </div>
+        <!-- Large Step 2 White Card (Figma Spec) -->
+        <div id="day-card-container" class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5] min-h-[620px] flex flex-col gap-4">
+          
+          <!-- Day Header Title -->
+          <h3 id="step2-day-title" class="text-[24px] font-normal text-black">Day 1</h3>
 
-          <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-3 text-sm">
-            <div class="flex items-center gap-2 text-gray-600">
-              <i data-lucide="calendar" class="w-4 h-4 text-[#739C8F]"></i>
-              <span id="result-date">15/01/26</span>
+          <!-- Details Table Block -->
+          <div class="space-y-2 text-[15px]">
+            <div class="flex items-center gap-2">
+              <span class="w-[110px] text-black flex items-center gap-1 font-normal">📍 Place :</span>
+              <span id="place-display-text" class="text-black font-normal">Royal Regalia Museum</span>
             </div>
-            <div class="flex items-center gap-2 text-gray-600">
-              <i data-lucide="clock" class="w-4 h-4 text-[#739C8F]"></i>
-              <span id="result-duration">2 Days</span>
+            <div class="flex items-center gap-2">
+              <span class="w-[110px] text-black flex items-center gap-1 font-normal">⏰ Time :</span>
+              <span id="time-display-text" class="text-black font-normal">9:00 AM</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-[110px] text-black flex items-center gap-1 font-normal">📝 Notes :</span>
             </div>
           </div>
 
-          <!-- Preferences Badges -->
-          <div id="result-preferences-container" class="mt-3 flex flex-wrap gap-1.5">
-            <!-- Dynamic tags -->
-          </div>
-        </div>
-
-        <!-- Day Timeline Activities -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-black">Day 1 Schedule</h3>
-            <span class="text-xs text-gray-600 font-medium">3 Activities</span>
-          </div>
-
-          <!-- Activity Item 1 -->
-          <div class="bg-white rounded-[19px] p-4 card-shadow flex gap-4 items-center border border-[#F5F5F5]">
-            <div class="w-12 h-12 rounded-xl bg-[#C2E6DB]/40 flex items-center justify-center shrink-0">
-              <i data-lucide="compass" class="w-6 h-6 text-[#498E79]"></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>09:30 AM</span>
-                <span class="text-[#498E79] font-medium">Morning</span>
+          <!-- Dynamic Task List -->
+          <div id="task-list-container" class="space-y-2.5 pt-1">
+            
+            <div class="task-item flex items-center gap-3 cursor-pointer group">
+              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0">
+                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-              <h4 class="text-sm font-semibold text-gray-900">Cultural Landmark Tour</h4>
-              <p class="text-xs text-gray-500 mt-0.5">Explore historic architecture & gardens</p>
+              <span class="text-[13px] text-black font-normal">Remember to bring cash.</span>
             </div>
-          </div>
 
-          <!-- Activity Item 2 -->
-          <div class="bg-white rounded-[19px] p-4 card-shadow flex gap-4 items-center border border-[#F5F5F5]">
-            <div class="w-12 h-12 rounded-xl bg-[#C2E6DB]/40 flex items-center justify-center shrink-0">
-              <i data-lucide="utensils" class="w-6 h-6 text-[#498E79]"></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>01:00 PM</span>
-                <span class="text-[#498E79] font-medium">Lunch</span>
+            <div class="task-item flex items-center gap-3 cursor-pointer group">
+              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0">
+                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-              <h4 class="text-sm font-semibold text-gray-900">Local Food Market</h4>
-              <p class="text-xs text-gray-500 mt-0.5">Taste authentic regional delicacies</p>
+              <span class="text-[13px] text-black font-normal">Take photos</span>
             </div>
-          </div>
 
-          <!-- Activity Item 3 -->
-          <div class="bg-white rounded-[19px] p-4 card-shadow flex gap-4 items-center border border-[#F5F5F5]">
-            <div class="w-12 h-12 rounded-xl bg-[#C2E6DB]/40 flex items-center justify-center shrink-0">
-              <i data-lucide="camera" class="w-6 h-6 text-[#498E79]"></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>04:30 PM</span>
-                <span class="text-[#498E79] font-medium">Afternoon</span>
+            <div class="task-item flex items-center gap-3 cursor-pointer group">
+              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0">
+                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-              <h4 class="text-sm font-semibold text-gray-900">Scenic Photo Spot & Promenade</h4>
-              <p class="text-xs text-gray-500 mt-0.5">Sunset viewing with iconic city backdrop</p>
+              <span class="text-[13px] text-black font-normal">Visit Gift Shop</span>
             </div>
+
           </div>
 
-        </div>
+          <!-- Action Buttons Area -->
+          <div class="space-y-3 pt-4 border-t border-gray-100 mt-2">
+            
+            <!-- Button 1: Add Another Task -->
+            <button 
+              id="btn-add-task" 
+              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
+            >
+              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
+                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
+              </div>
+              <span class="text-[13px] text-black font-normal">Add Another Task</span>
+            </button>
 
-        <!-- Modify Plan Button -->
-        <div class="pt-2">
-          <button 
-            id="edit-plan-btn"
-            class="w-full py-3 bg-white text-[#3c6c5e] font-medium rounded-xl shadow border border-[#739C8F]/30 hover:bg-gray-50 transition-colors text-sm"
-          >
-            Edit Trip Details
-          </button>
+            <!-- Button 2: Add Place -->
+            <button 
+              id="btn-add-place" 
+              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
+            >
+              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
+                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
+              </div>
+              <span class="text-[15px] text-black font-normal">Add Place</span>
+            </button>
+
+            <!-- Button 3: Add Time -->
+            <button 
+              id="btn-add-time" 
+              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
+            >
+              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
+                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
+              </div>
+              <span class="text-[15px] text-black font-normal">Add Time</span>
+            </button>
+
+            <!-- Button 4: Add Another Place -->
+            <button 
+              id="btn-add-another-place" 
+              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
+            >
+              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
+                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
+              </div>
+              <span class="text-[15px] text-black font-normal">Add Another Place</span>
+            </button>
+
+          </div>
+
         </div>
 
       </div>
 
+      <!-- Bottom Continue Button in Step 2 -->
+      <div class="absolute bottom-6 right-[20px] z-10">
+        <button 
+          id="continue-step2-btn"
+          class="flex items-center justify-center gap-2 w-[113px] h-[32px] bg-gradient-to-r from-[#B0DDD0]/30 to-[#498E79]/30 bg-[#98C2B5] rounded-[13px] shadow-md hover:brightness-105 active:scale-95 transition-all text-black text-[15px] font-medium"
+        >
+          <span>Continue</span>
+          <div class="w-4 h-4 rounded-full bg-white/40 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Modal Popup Dialog for Dynamic Inputs -->
+    <div id="input-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-[340px] shadow-2xl border border-gray-100 flex flex-col gap-3 animate-in fade-in zoom-in-95">
+        <h4 id="modal-title" class="text-lg font-semibold text-gray-900">Add Item</h4>
+        <input 
+          type="text" 
+          id="modal-input" 
+          placeholder="Enter details..." 
+          class="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
+        />
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="modal-cancel-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+          <button id="modal-confirm-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-white bg-[#739C8F] rounded-lg hover:bg-[#5b8074]">Add</button>
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
-    /* Initialize Lucide Icons */
-    lucide.createIcons();
-
     /* App State Variables */
     let selectedDate = { year: 2026, month: 0, day: 15 }; // Month 0 = Jan
     let currentCalYear = 2026;
     let currentCalMonth = 0; // January
     let selectedDuration = '2 Days';
     let selectedPreferences = ['Nature', 'Food', 'Culture'];
+    let modalActionType = '';
 
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -425,24 +491,27 @@
       return new Date(year, month, 1).getDay();
     }
 
+    /* Render 1-31 Calendar Grid */
     function renderCalendar() {
-      const calMonthYearLabel = document.getElementById('cal-month-year');
+      const monthSelect = document.getElementById('cal-month-select');
+      const yearSelect = document.getElementById('cal-year-select');
       const gridContainer = document.getElementById('calendar-days-grid');
 
-      calMonthYearLabel.textContent = `${monthNames[currentCalMonth]} 1, ${currentCalYear}`;
+      monthSelect.value = currentCalMonth;
+      yearSelect.value = currentCalYear;
       gridContainer.innerHTML = '';
 
       const totalDays = getDaysInMonth(currentCalYear, currentCalMonth);
       const startDay = getFirstDayOfWeek(currentCalYear, currentCalMonth);
 
-      // Render empty padding cells before day 1
+      // Render empty padding cells
       for (let i = 0; i < startDay; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'w-[22px] h-[22px]';
         gridContainer.appendChild(emptyCell);
       }
 
-      // Render day cells from 1 to 31 (or month length)
+      // Render day cells from 1 to 31
       for (let day = 1; day <= totalDays; day++) {
         const dayBtn = document.createElement('button');
         dayBtn.type = 'button';
@@ -453,11 +522,10 @@
           selectedDate.month === currentCalMonth &&
           selectedDate.day === day;
 
-        dayBtn.className = `day-btn w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-['Instrument_Sans'] ${
+        dayBtn.className = `day-btn w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] ${
           isSelected ? 'selected' : 'text-black'
         }`;
 
-        // Add day click listener
         dayBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           selectedDate = {
@@ -466,10 +534,7 @@
             day: day
           };
           
-          // Update text field
           document.getElementById('selected-date-text').textContent = formatDateString(selectedDate);
-          
-          // Close popup & re-render
           document.getElementById('calendar-popup').classList.add('hidden');
           renderCalendar();
         });
@@ -478,29 +543,56 @@
       }
     }
 
+    /* Bind Task Item Click Listener for toggling checkmark */
+    function bindTaskToggle(taskElement) {
+      taskElement.addEventListener('click', () => {
+        const box = taskElement.querySelector('.checkbox-box');
+        const checkIcon = taskElement.querySelector('.check-icon');
+        const isChecked = box.classList.contains('bg-[#739C8F]');
+
+        if (isChecked) {
+          box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0';
+          checkIcon.classList.add('hidden');
+        } else {
+          box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0';
+          checkIcon.classList.remove('hidden');
+        }
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       renderCalendar();
+
+      // Bind initial task items in Step 2
+      document.querySelectorAll('.task-item').forEach(bindTaskToggle);
 
       const dateTriggerBtn = document.getElementById('date-trigger-btn');
       const calendarPopup = document.getElementById('calendar-popup');
       const calPrevBtn = document.getElementById('cal-prev-btn');
       const calNextBtn = document.getElementById('cal-next-btn');
+      const monthSelect = document.getElementById('cal-month-select');
+      const yearSelect = document.getElementById('cal-year-select');
 
-      // Toggle Calendar visibility
+      // Toggle Calendar Visibility
       dateTriggerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         calendarPopup.classList.toggle('hidden');
       });
 
-      // Prevent popup close on internal clicks
       calendarPopup.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', () => calendarPopup.classList.add('hidden'));
 
-      // Close calendar when clicking outside
-      document.addEventListener('click', () => {
-        calendarPopup.classList.add('hidden');
+      // Calendar Dropdown Navigation
+      monthSelect.addEventListener('change', (e) => {
+        currentCalMonth = parseInt(e.target.value);
+        renderCalendar();
       });
 
-      // Month Navigation Prev
+      yearSelect.addEventListener('change', (e) => {
+        currentCalYear = parseInt(e.target.value);
+        renderCalendar();
+      });
+
       calPrevBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (currentCalMonth === 0) {
@@ -512,7 +604,6 @@
         renderCalendar();
       });
 
-      // Month Navigation Next
       calNextBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (currentCalMonth === 11) {
@@ -531,7 +622,6 @@
           const val = option.getAttribute('data-value');
           selectedDuration = val;
 
-          // Update UI radio style
           durationOptions.forEach(opt => {
             const box = opt.querySelector('.checkbox-box');
             const checkIcon = opt.querySelector('.check-icon');
@@ -546,7 +636,7 @@
         });
       });
 
-      // Preferences Toggle Logic
+      // Preference Selection Logic
       const prefOptions = document.querySelectorAll('.pref-option');
       prefOptions.forEach(option => {
         option.addEventListener('click', () => {
@@ -566,46 +656,110 @@
         });
       });
 
-      // Navigation: Continue Button (Step 1 -> Step 2)
+      // Navigation: Step 1 -> Step 2 transition
       const continueBtn = document.getElementById('continue-btn');
       const step1View = document.getElementById('step-1-view');
       const step2View = document.getElementById('step-2-view');
+      const backToStep1Btn = document.getElementById('back-to-step1-btn');
 
       continueBtn.addEventListener('click', () => {
-        // Update Step 2 text with user selections
-        const tripNameInput = document.getElementById('trip-name-input').value;
-        document.getElementById('result-trip-name').textContent = tripNameInput || 'My Amazing Trip';
-        document.getElementById('result-date').textContent = formatDateString(selectedDate);
-        document.getElementById('result-duration').textContent = selectedDuration;
-
-        // Populate selected preference tags
-        const tagsContainer = document.getElementById('result-preferences-container');
-        tagsContainer.innerHTML = '';
-        selectedPreferences.forEach(p => {
-          const tag = document.createElement('span');
-          tag.className = 'px-2.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-md';
-          tag.textContent = `#${p}`;
-          tagsContainer.appendChild(tag);
-        });
-
-        // Switch views
         step1View.classList.add('hidden');
         step2View.classList.remove('hidden');
         step2View.classList.add('flex');
       });
 
-      // Navigation: Back Button (Step 2 -> Step 1)
-      const backToStep1Btn = document.getElementById('back-to-step1-btn');
-      const editPlanBtn = document.getElementById('edit-plan-btn');
-
-      const goToStep1 = () => {
+      backToStep1Btn.addEventListener('click', () => {
         step2View.classList.add('hidden');
         step2View.classList.remove('flex');
         step1View.classList.remove('hidden');
+      });
+
+      // Modal Input Dialog Handlers
+      const inputModal = document.getElementById('input-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalInput = document.getElementById('modal-input');
+      const modalCancelBtn = document.getElementById('modal-cancel-btn');
+      const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+      const openModal = (title, placeholder, actionType) => {
+        modalTitle.textContent = title;
+        modalInput.placeholder = placeholder;
+        modalInput.value = '';
+        modalActionType = actionType;
+        inputModal.classList.remove('hidden');
+        modalInput.focus();
       };
 
-      backToStep1Btn.addEventListener('click', goToStep1);
-      editPlanBtn.addEventListener('click', goToStep1);
+      const closeModal = () => {
+        inputModal.classList.add('hidden');
+      };
+
+      modalCancelBtn.addEventListener('click', closeModal);
+
+      // Handle Adding New Items
+      modalConfirmBtn.addEventListener('click', () => {
+        const val = modalInput.value.trim();
+        if (!val) {
+          closeModal();
+          return;
+        }
+
+        if (modalActionType === 'task') {
+          // Add task to checklist
+          const taskContainer = document.getElementById('task-list-container');
+          const newTask = document.createElement('div');
+          newTask.className = 'task-item flex items-center gap-3 cursor-pointer group';
+          newTask.innerHTML = `
+            <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0">
+              <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-[13px] text-black font-normal">${val}</span>
+          `;
+          bindTaskToggle(newTask);
+          taskContainer.appendChild(newTask);
+        } else if (modalActionType === 'place') {
+          document.getElementById('place-display-text').textContent = val;
+        } else if (modalActionType === 'time') {
+          document.getElementById('time-display-text').textContent = val;
+        } else if (modalActionType === 'another-place') {
+          // Add Another Place Block
+          const taskContainer = document.getElementById('task-list-container');
+          const placeBlock = document.createElement('div');
+          placeBlock.className = 'pt-3 border-t border-gray-100 space-y-1';
+          placeBlock.innerHTML = `
+            <div class="flex items-center gap-2 text-[14px]">
+              <span class="w-[110px] text-black font-normal">📍 Place :</span>
+              <span class="text-black font-normal">${val}</span>
+            </div>
+          `;
+          taskContainer.appendChild(placeBlock);
+        }
+
+        closeModal();
+      });
+
+      // Button Click Handlers
+      document.getElementById('btn-add-task').addEventListener('click', () => {
+        openModal('Add Another Task', 'e.g. Buy souvenir', 'task');
+      });
+
+      document.getElementById('btn-add-place').addEventListener('click', () => {
+        openModal('Add Place', 'e.g. Sultan Omar Ali Saifuddien Mosque', 'place');
+      });
+
+      document.getElementById('btn-add-time').addEventListener('click', () => {
+        openModal('Add Time', 'e.g. 11:30 AM', 'time');
+      });
+
+      document.getElementById('btn-add-another-place').addEventListener('click', () => {
+        openModal('Add Another Place', 'e.g. Gadong Night Market', 'another-place');
+      });
+
+      document.getElementById('continue-step2-btn').addEventListener('click', () => {
+        alert('Itinerary finalized successfully!');
+      });
     });
   </script>
 </body>
