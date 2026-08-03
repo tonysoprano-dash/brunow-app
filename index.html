@@ -166,7 +166,7 @@
         <div class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5]">
           <h3 class="text-[24px] font-normal text-black mb-4">How many days?</h3>
           <div class="space-y-3" id="duration-options">
-            <!-- Duration Item: Half Day -->
+            <!-- Duration Options -->
             <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="Half Day">
               <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
                 <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
@@ -175,7 +175,6 @@
               </div>
               <span class="text-[15px] text-black font-normal">Half Day</span>
             </div>
-            <!-- Duration Item: 1 Day -->
             <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="1 Day">
               <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
                 <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
@@ -184,7 +183,6 @@
               </div>
               <span class="text-[15px] text-black font-normal">1 Day</span>
             </div>
-            <!-- Duration Item: 2 Days (Default) -->
             <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="2 Days">
               <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
                 <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
@@ -193,7 +191,6 @@
               </div>
               <span class="text-[15px] text-black font-normal">2 Days</span>
             </div>
-            <!-- Duration Item: 3+ Days -->
             <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="3+ Days">
               <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
                 <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
@@ -322,100 +319,22 @@
           <!-- Day Header Title -->
           <h3 id="step2-day-title" class="text-[24px] font-normal text-black">Day 1</h3>
 
-          <!-- Details Table Block -->
-          <div class="space-y-2 text-[15px]">
-            <div class="flex items-center gap-2">
-              <span class="w-[110px] text-black flex items-center gap-1 font-normal">📍 Place :</span>
-              <span id="place-display-text" class="text-black font-normal">Royal Regalia Museum</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="w-[110px] text-black flex items-center gap-1 font-normal">⏰ Time :</span>
-              <span id="time-display-text" class="text-black font-normal">9:00 AM</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="w-[110px] text-black flex items-center gap-1 font-normal">📝 Notes :</span>
-            </div>
+          <!-- Dynamic Itinerary Plan Blocks Container -->
+          <div id="itinerary-blocks-container" class="space-y-4">
+            <!-- Injected via renderItinerary() -->
           </div>
 
-          <!-- Dynamic Task List -->
-          <div id="task-list-container" class="space-y-2.5 pt-1">
-            
-            <div class="task-item flex items-center gap-3 cursor-pointer group">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[13px] text-black font-normal">Remember to bring cash.</span>
-            </div>
-
-            <div class="task-item flex items-center gap-3 cursor-pointer group">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[13px] text-black font-normal">Take photos</span>
-            </div>
-
-            <div class="task-item flex items-center gap-3 cursor-pointer group">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[13px] text-black font-normal">Visit Gift Shop</span>
-            </div>
-
-          </div>
-
-          <!-- Action Buttons Area -->
-          <div class="space-y-3 pt-4 border-t border-gray-100 mt-2">
-            
-            <!-- Button 1: Add Another Task -->
+          <!-- Bottom Add Place Button -->
+          <div class="pt-2 border-t border-gray-100">
             <button 
-              id="btn-add-task" 
-              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
-            >
-              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
-                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
-              </div>
-              <span class="text-[13px] text-black font-normal">Add Another Task</span>
-            </button>
-
-            <!-- Button 2: Add Place -->
-            <button 
-              id="btn-add-place" 
-              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
+              id="btn-add-place-block" 
+              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-2 rounded-lg transition-colors group"
             >
               <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
                 <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
               </div>
               <span class="text-[15px] text-black font-normal">Add Place</span>
             </button>
-
-            <!-- Button 3: Add Time -->
-            <button 
-              id="btn-add-time" 
-              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
-            >
-              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
-                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
-              </div>
-              <span class="text-[15px] text-black font-normal">Add Time</span>
-            </button>
-
-            <!-- Button 4: Add Another Place -->
-            <button 
-              id="btn-add-another-place" 
-              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-1.5 rounded-lg transition-colors group"
-            >
-              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
-                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
-              </div>
-              <span class="text-[15px] text-black font-normal">Add Another Place</span>
-            </button>
-
           </div>
 
         </div>
@@ -443,12 +362,11 @@
     <div id="input-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-2xl p-5 w-full max-w-[340px] shadow-2xl border border-gray-100 flex flex-col gap-3 animate-in fade-in zoom-in-95">
         <h4 id="modal-title" class="text-lg font-semibold text-gray-900">Add Item</h4>
-        <input 
-          type="text" 
-          id="modal-input" 
-          placeholder="Enter details..." 
-          class="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
-        />
+        
+        <div id="modal-fields-container" class="space-y-2">
+          <!-- Dynamic inputs will be placed here -->
+        </div>
+
         <div class="flex justify-end gap-2 pt-2">
           <button id="modal-cancel-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
           <button id="modal-confirm-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-white bg-[#739C8F] rounded-lg hover:bg-[#5b8074]">Add</button>
@@ -466,6 +384,21 @@
     let selectedDuration = '2 Days';
     let selectedPreferences = ['Nature', 'Food', 'Culture'];
     let modalActionType = '';
+    let targetPlaceId = null;
+
+    /* Structured Itinerary Data (Grouped by Place Plans) */
+    let itineraryData = [
+      {
+        id: 1,
+        place: 'Royal Regalia Museum',
+        time: '9:00 AM',
+        tasks: [
+          { id: 101, text: 'Remember to bring cash.', checked: true },
+          { id: 102, text: 'Take photos', checked: true },
+          { id: 103, text: 'Visit Gift Shop', checked: false }
+        ]
+      }
+    ];
 
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -489,6 +422,12 @@
     /* Helper: Get starting weekday (0 = Sun, 1 = Mon...) */
     function getFirstDayOfWeek(year, month) {
       return new Date(year, month, 1).getDay();
+    }
+
+    /* Helper: Escape HTML strings to prevent layout breaks */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
     /* Render 1-31 Calendar Grid */
@@ -543,28 +482,108 @@
       }
     }
 
-    /* Bind Task Item Click Listener for toggling checkmark */
-    function bindTaskToggle(taskElement) {
-      taskElement.addEventListener('click', () => {
-        const box = taskElement.querySelector('.checkbox-box');
-        const checkIcon = taskElement.querySelector('.check-icon');
-        const isChecked = box.classList.contains('bg-[#739C8F]');
+    /* Toggle Task Checkmark State */
+    window.toggleTaskCheck = function(placeId, taskId) {
+      const placeObj = itineraryData.find(p => p.id === placeId);
+      if (placeObj) {
+        const taskObj = placeObj.tasks.find(t => t.id === taskId);
+        if (taskObj) {
+          taskObj.checked = !taskObj.checked;
+          renderItinerary();
+        }
+      }
+    };
 
-        if (isChecked) {
-          box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0';
-          checkIcon.classList.add('hidden');
-        } else {
-          box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all shrink-0';
-          checkIcon.classList.remove('hidden');
+    /* Open Add Task Modal for a Specific Place Block */
+    window.openAddTaskModal = function(placeId) {
+      targetPlaceId = placeId;
+      modalActionType = 'task';
+      
+      document.getElementById('modal-title').textContent = 'Add Another Task';
+      const container = document.getElementById('modal-fields-container');
+      container.innerHTML = `
+        <input 
+          type="text" 
+          id="modal-input-task" 
+          placeholder="e.g. Buy souvenirs" 
+          class="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
+        />
+      `;
+      document.getElementById('input-modal').classList.remove('hidden');
+      document.getElementById('modal-input-task').focus();
+    };
+
+    /* Render Structured Itinerary Blocks in Step 2 */
+    function renderItinerary() {
+      const container = document.getElementById('itinerary-blocks-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      itineraryData.forEach((item, index) => {
+        const block = document.createElement('div');
+        block.className = 'place-plan-block space-y-3';
+
+        // Block Content (📍 Place, ⏰ Time, 📝 Notes and Checklists)
+        block.innerHTML = `
+          <div class="space-y-1.5 text-[15px]">
+            <div class="flex items-center gap-2">
+              <span class="text-black font-normal flex items-center gap-1 shrink-0">📍 Place :</span>
+              <span class="text-black font-normal leading-tight">${escapeHtml(item.place)}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-black font-normal flex items-center gap-1 shrink-0">⏰ Time :</span>
+              <span class="text-black font-normal leading-tight">${escapeHtml(item.time)}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-black font-normal flex items-center gap-1 shrink-0">📝 Notes :</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Task List for this specific plan -->
+          <div class="task-list space-y-2.5 pt-0.5">
+            ${item.tasks.map(task => `
+              <div 
+                class="task-item flex items-center gap-3 cursor-pointer group"
+                onclick="toggleTaskCheck(${item.id}, ${task.id})"
+              >
+                <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] ${task.checked ? 'border-[#739C8F] bg-[#739C8F]' : 'border-[rgba(64,64,64,0.35)]'} flex items-center justify-center transition-all shrink-0">
+                  <svg class="check-icon w-3 h-3 text-white ${task.checked ? '' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span class="text-[13px] text-black font-normal">${escapeHtml(task.text)}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Add Another Task Button for this Plan -->
+          <div class="pt-1">
+            <button 
+              type="button"
+              onclick="openAddTaskModal(${item.id})" 
+              class="flex items-center gap-2.5 text-left hover:bg-gray-50 px-1 py-1 rounded transition-colors group"
+            >
+              <div class="w-5 h-5 bg-black rounded flex items-center justify-center shrink-0">
+                <span class="text-[#F7CD4F] font-bold text-sm leading-none">+</span>
+              </div>
+              <span class="text-[13px] text-black font-normal">Add Another Task</span>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(block);
+
+        // Add a dividing line after each plan block to cleanly separate plans
+        if (index < itineraryData.length) {
+          const hr = document.createElement('div');
+          hr.className = 'w-full my-4 border-t border-gray-200';
+          container.appendChild(hr);
         }
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       renderCalendar();
-
-      // Bind initial task items in Step 2
-      document.querySelectorAll('.task-item').forEach(bindTaskToggle);
 
       const dateTriggerBtn = document.getElementById('date-trigger-btn');
       const calendarPopup = document.getElementById('calendar-popup');
@@ -666,6 +685,7 @@
         step1View.classList.add('hidden');
         step2View.classList.remove('hidden');
         step2View.classList.add('flex');
+        renderItinerary();
       });
 
       backToStep1Btn.addEventListener('click', () => {
@@ -676,19 +696,8 @@
 
       // Modal Input Dialog Handlers
       const inputModal = document.getElementById('input-modal');
-      const modalTitle = document.getElementById('modal-title');
-      const modalInput = document.getElementById('modal-input');
       const modalCancelBtn = document.getElementById('modal-cancel-btn');
       const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-
-      const openModal = (title, placeholder, actionType) => {
-        modalTitle.textContent = title;
-        modalInput.placeholder = placeholder;
-        modalInput.value = '';
-        modalActionType = actionType;
-        inputModal.classList.remove('hidden');
-        modalInput.focus();
-      };
 
       const closeModal = () => {
         inputModal.classList.add('hidden');
@@ -696,65 +705,81 @@
 
       modalCancelBtn.addEventListener('click', closeModal);
 
-      // Handle Adding New Items
-      modalConfirmBtn.addEventListener('click', () => {
-        const val = modalInput.value.trim();
-        if (!val) {
-          closeModal();
-          return;
-        }
+      // Add New Place Block Button Event
+      document.getElementById('btn-add-place-block').addEventListener('click', () => {
+        modalActionType = 'place_block';
+        document.getElementById('modal-title').textContent = 'Add New Place / Plan';
+        const container = document.getElementById('modal-fields-container');
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">📍 Place Name</label>
+              <input 
+                type="text" 
+                id="modal-input-place" 
+                placeholder="e.g. Sultan Omar Ali Saifuddien Mosque" 
+                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">⏰ Time</label>
+              <input 
+                type="text" 
+                id="modal-input-time" 
+                placeholder="e.g. 10:30 AM" 
+                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">📝 Initial Note / Task</label>
+              <input 
+                type="text" 
+                id="modal-input-note" 
+                placeholder="e.g. Remove shoes before entering" 
+                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
+              />
+            </div>
+          </div>
+        `;
+        inputModal.classList.remove('hidden');
+        document.getElementById('modal-input-place').focus();
+      });
 
+      // Handle Modal Confirm Button
+      modalConfirmBtn.addEventListener('click', () => {
         if (modalActionType === 'task') {
-          // Add task to checklist
-          const taskContainer = document.getElementById('task-list-container');
-          const newTask = document.createElement('div');
-          newTask.className = 'task-item flex items-center gap-3 cursor-pointer group';
-          newTask.innerHTML = `
-            <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all shrink-0">
-              <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <span class="text-[13px] text-black font-normal">${val}</span>
-          `;
-          bindTaskToggle(newTask);
-          taskContainer.appendChild(newTask);
-        } else if (modalActionType === 'place') {
-          document.getElementById('place-display-text').textContent = val;
-        } else if (modalActionType === 'time') {
-          document.getElementById('time-display-text').textContent = val;
-        } else if (modalActionType === 'another-place') {
-          // Add Another Place Block
-          const taskContainer = document.getElementById('task-list-container');
-          const placeBlock = document.createElement('div');
-          placeBlock.className = 'pt-3 border-t border-gray-100 space-y-1';
-          placeBlock.innerHTML = `
-            <div class="flex items-center gap-2 text-[14px]">
-              <span class="w-[110px] text-black font-normal">📍 Place :</span>
-              <span class="text-black font-normal">${val}</span>
-            </div>
-          `;
-          taskContainer.appendChild(placeBlock);
+          const inputEl = document.getElementById('modal-input-task');
+          const val = inputEl ? inputEl.value.trim() : '';
+          if (val && targetPlaceId) {
+            const placeObj = itineraryData.find(p => p.id === targetPlaceId);
+            if (placeObj) {
+              placeObj.tasks.push({
+                id: Date.now(),
+                text: val,
+                checked: false
+              });
+              renderItinerary();
+            }
+          }
+        } else if (modalActionType === 'place_block') {
+          const placeVal = document.getElementById('modal-input-place').value.trim() || 'New Destination';
+          const timeVal = document.getElementById('modal-input-time').value.trim() || '12:00 PM';
+          const noteVal = document.getElementById('modal-input-note').value.trim() || 'Explore area';
+
+          const newPlaceObj = {
+            id: Date.now(),
+            place: placeVal,
+            time: timeVal,
+            tasks: [
+              { id: Date.now() + 1, text: noteVal, checked: false }
+            ]
+          };
+
+          itineraryData.push(newPlaceObj);
+          renderItinerary();
         }
 
         closeModal();
-      });
-
-      // Button Click Handlers
-      document.getElementById('btn-add-task').addEventListener('click', () => {
-        openModal('Add Another Task', 'e.g. Buy souvenir', 'task');
-      });
-
-      document.getElementById('btn-add-place').addEventListener('click', () => {
-        openModal('Add Place', 'e.g. Sultan Omar Ali Saifuddien Mosque', 'place');
-      });
-
-      document.getElementById('btn-add-time').addEventListener('click', () => {
-        openModal('Add Time', 'e.g. 11:30 AM', 'time');
-      });
-
-      document.getElementById('btn-add-another-place').addEventListener('click', () => {
-        openModal('Add Another Place', 'e.g. Gadong Night Market', 'another-place');
       });
 
       document.getElementById('continue-step2-btn').addEventListener('click', () => {
