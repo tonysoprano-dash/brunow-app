@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Travel Itinerary Planner</title>
+  <title>BruNow - AI Brunei Travel Assistant</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,16 +11,35 @@
   <!-- Google Fonts: Instrument Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Instrument Sans', 'sans-serif'],
+          },
+          colors: {
+            darkBg: '#252B29',
+            cardDark: '#2C3330',
+            userBubble: '#EFEBE3',
+            sageGreen: '#6E9183',
+            goldAccent: '#F7CD4F',
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
     body {
       font-family: 'Instrument Sans', sans-serif;
-      background-color: #1E293B;
+      background-color: #1A1F1D;
       user-select: none;
     }
 
-    /* Custom Scrollbar styling */
+    /* Scrollbar styling */
     .scrollbar-none::-webkit-scrollbar {
       display: none;
     }
@@ -29,762 +48,443 @@
       scrollbar-width: none;
     }
 
-    /* Subtle custom card shadows matching Figma spec */
-    .card-shadow {
-      box-shadow: 17px 10px 15.5px rgba(0, 0, 0, 0.05),
-                  -3.2px 27.7px 27.7px rgba(0, 0, 0, 0.04),
-                  -8.1px 62px 37.5px rgba(0, 0, 0, 0.03);
+    /* Custom chat bubble animation */
+    .chat-enter {
+      animation: fadeInUp 0.25s ease-out forwards;
     }
 
-    /* Interactive calendar button animation */
-    .day-btn {
-      transition: all 0.15s ease-in-out;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .day-btn:hover {
-      background-color: #EAEAEA;
+
+    .typing-dot {
+      animation: typingBounce 1.4s infinite ease-in-out both;
     }
-    .day-btn.selected {
-      background-color: #739C8F;
-      color: #FFFFFF;
-      font-weight: 600;
-      transform: scale(1.1);
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
     }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6">
 
-  <!-- Mobile Device Outer Container (430px x 932px) -->
-  <div class="relative w-full max-w-[430px] h-[932px] bg-[#C2E6DB] rounded-[48px] shadow-2xl overflow-hidden border-[8px] border-[#0F172A] flex flex-col">
+  <div class="relative w-full max-w-[430px] h-[932px] bg-darkBg rounded-[48px] shadow-2xl overflow-hidden border-[8px] border-[#111614] flex flex-col text-white">
     
-    <!-- Camera Notch Dynamic Island Element -->
+    <!-- Camera Island Notch -->
     <div class="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-4 bg-black rounded-full z-50 flex items-center justify-center gap-2">
       <div class="w-2.5 h-2.5 bg-[#111] rounded-full"></div>
       <div class="w-1.5 h-1.5 bg-[#0a192f] rounded-full"></div>
     </div>
 
-    <!-- ================= STEP 1: FORM VIEW ================= -->
-    <div id="step-1-view" class="relative w-full h-full pt-[26px] flex flex-col">
+    <header class="relative w-full h-[70px] pt-6 px-5 flex items-center justify-between border-b border-white/10 shrink-0 bg-darkBg/90 backdrop-blur-md z-40">
+      <button id="back-btn" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+
+      <!-- BruNow Logo & Mascot -->
+      <div class="flex items-center gap-2">
+        <div class="relative w-9 h-9 rounded-full bg-amber-100/10 border border-amber-300/30 flex items-center justify-center overflow-hidden">
+          <span class="text-xl">🦜</span>
+        </div>
+        <div class="flex items-center">
+          <span class="text-xl font-bold tracking-tight text-amber-400">Bru</span>
+          <span class="text-xl font-bold tracking-tight text-white">Now</span>
+        </div>
+      </div>
+
+      <!-- Settings / Reset Button -->
+      <button id="reset-chat-btn" title="Reset Chat" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+    </header>
+
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none">
       
-      <!-- Top Navigation Header -->
-      <div class="relative w-full h-[50px] flex items-center justify-center px-6">
-        <button id="back-btn-step1" class="absolute left-6 w-[36px] h-[30px] flex items-center justify-center hover:opacity-70 transition-opacity">
-          <svg class="w-6 h-6 text-black transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        <span class="text-[18px] font-normal text-black tracking-wide">Itinerary</span>
-      </div>
-
-      <!-- Scrollable Main Form -->
-      <div class="flex-1 overflow-y-auto px-[20px] pt-[10px] pb-[90px] space-y-[16px] scrollbar-none">
-        
-        <!-- Card 1: Create your Plans -->
-        <div class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5]">
-          <h2 class="text-[24px] font-normal text-black leading-tight">Create your Plans</h2>
-          <p class="text-[15px] font-normal text-black mt-1 mb-4">Personalized for you.</p>
-
-          <div class="space-y-[10px]">
-            <!-- Trip Name Input -->
-            <div class="relative w-full">
-              <input
-                type="text"
-                id="trip-name-input"
-                value="Tokyo Adventure"
-                placeholder="Trip Name"
-                class="w-full h-[36px] px-3 bg-[#EAEAEA] rounded-[4px] text-[15px] text-black placeholder-[#B3B1B1] outline-none focus:ring-1 focus:ring-[#739C8F]"
-              />
-            </div>
-
-            <!-- Date Selector with Calendar Trigger -->
-            <div class="relative w-full">
-              <button
-                type="button"
-                id="date-trigger-btn"
-                class="w-full h-[36px] px-3 bg-[#EAEAEA] rounded-[4px] text-[15px] flex items-center justify-between text-left outline-none focus:ring-1 focus:ring-[#739C8F]"
-              >
-                <span id="selected-date-text" class="text-black">15/01/26</span>
-                <svg class="w-4 h-4 text-[#739C8F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </button>
-
-              <!-- Interactive Popup Calendar Widget with Year & Month Selection -->
-              <div 
-                id="calendar-popup" 
-                class="hidden absolute left-0 top-[42px] z-50 w-[250px] bg-white rounded-[10px] p-3 shadow-2xl border border-[#E0E0E0]"
-              >
-                <!-- Calendar Header with Month/Year Dropdowns -->
-                <div class="flex items-center justify-between mb-2 px-1 gap-1">
-                  <select id="cal-month-select" class="text-[12px] font-semibold text-black bg-[#F5F5F5] border border-gray-200 rounded px-1 py-0.5 outline-none cursor-pointer">
-                    <option value="0">January</option>
-                    <option value="1">February</option>
-                    <option value="2">March</option>
-                    <option value="3">April</option>
-                    <option value="4">May</option>
-                    <option value="5">June</option>
-                    <option value="6">July</option>
-                    <option value="7">August</option>
-                    <option value="8">September</option>
-                    <option value="9">October</option>
-                    <option value="10">November</option>
-                    <option value="11">December</option>
-                  </select>
-
-                  <select id="cal-year-select" class="text-[12px] font-semibold text-black bg-[#F5F5F5] border border-gray-200 rounded px-1 py-0.5 outline-none cursor-pointer">
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
-                  </select>
-
-                  <div class="flex items-center gap-0.5 ml-auto">
-                    <button type="button" id="cal-prev-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F]">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <button type="button" id="cal-next-btn" class="p-1 hover:bg-[#F0F0F0] rounded text-[#739C8F]">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Days of Week Header -->
-                <div class="grid grid-cols-7 text-center mb-1 text-[10px] text-gray-600 font-medium">
-                  <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-                </div>
-
-                <!-- Days Grid (1 to 31 dynamic insertion) -->
-                <div id="calendar-days-grid" class="grid grid-cols-7 gap-y-1 justify-items-center text-[10px]">
-                  <!-- Injected via JavaScript -->
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: How many days? -->
-        <div class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5]">
-          <h3 class="text-[24px] font-normal text-black mb-4">How many days?</h3>
-          <div class="space-y-3" id="duration-options">
-            <!-- Duration Options -->
-            <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="Half Day">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Half Day</span>
-            </div>
-            <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="1 Day">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">1 Day</span>
-            </div>
-            <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="2 Days">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">2 Days</span>
-            </div>
-            <div class="duration-option flex items-center gap-3 cursor-pointer group" data-value="3+ Days">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">3+ Days</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: What do you like? -->
-        <div class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5]">
-          <h3 class="text-[24px] font-normal text-black mb-4">What do you like?</h3>
-          <div class="space-y-3" id="preference-options">
-            
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Nature">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Nature</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Food">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Food</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Museums">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Museums</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Culture">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Culture</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Shopping">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Shopping</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Photography">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Photography</span>
-            </div>
-
-            <div class="pref-option flex items-center gap-3 cursor-pointer group" data-value="Family">
-              <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all">
-                <svg class="check-icon w-3 h-3 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span class="text-[15px] text-black font-normal">Family</span>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Bottom Action Bar (Continue Button) -->
-      <div class="absolute bottom-6 right-[20px] z-10">
-        <button 
-          id="continue-btn"
-          class="flex items-center justify-center gap-2 w-[113px] h-[32px] bg-gradient-to-r from-[#B0DDD0]/30 to-[#498E79]/30 bg-[#98C2B5] rounded-[13px] shadow-md hover:brightness-105 active:scale-95 transition-all text-black text-[15px] font-medium"
-        >
-          <span>Continue</span>
-          <div class="w-4 h-4 rounded-full bg-white/40 flex items-center justify-center">
-            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- ================= STEP 2: "NOW THE FUN PART" ITINERARY VIEW ================= -->
-    <div id="step-2-view" class="hidden relative w-full h-full pt-[26px] bg-[#C2E6DB] flex-col">
-      
-      <!-- Top Navigation Header -->
-      <div class="relative w-full h-[50px] flex items-center justify-center px-6 shrink-0">
-        <button id="back-to-step1-btn" class="absolute left-6 w-[36px] h-[30px] flex items-center justify-center hover:opacity-70 transition-opacity">
-          <svg class="w-6 h-6 text-black transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        <span class="text-[18px] font-normal text-black tracking-wide">Itinerary</span>
-      </div>
-
-      <!-- Subtitle Title -->
-      <div class="px-[32px] pt-[10px] pb-[8px]">
-        <h2 class="text-[24px] font-normal text-black leading-tight">Now the fun part.</h2>
-      </div>
-
-      <!-- Main Step 2 Scrollable Container -->
-      <div class="flex-1 overflow-y-auto px-[20px] pb-[90px] scrollbar-none">
-        
-        <!-- Large Step 2 White Card (Figma Spec) -->
-        <div id="day-card-container" class="relative w-full bg-white rounded-[19px] p-[20px] card-shadow border border-[#F5F5F5] min-h-[620px] flex flex-col gap-4">
+      <!-- Bot Initial Welcome Message -->
+      <div class="chat-enter flex flex-col items-start gap-1 max-w-[90%]">
+        <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 space-y-3">
+          <p>Hi! 👋 I'd be happy to help you explore Brunei.</p>
+          <p class="text-gray-300">Before I create your itinerary, could you tell me a little more?</p>
           
-          <!-- Day Header Title -->
-          <h3 id="step2-day-title" class="text-[24px] font-normal text-black">Day 1</h3>
+          <ul class="text-xs text-gray-300 space-y-1 list-none pl-1">
+            <li class="flex items-center gap-1.5">📍 Where are you staying?</li>
+            <li class="flex items-center gap-1.5">🚗 Do you have your own transport?</li>
+            <li class="flex items-center gap-1.5">💰 What's your budget?</li>
+            <li class="flex items-center gap-1.5">🌿 What are you interested in?</li>
+          </ul>
 
-          <!-- Dynamic Itinerary Plan Blocks Container -->
-          <div id="itinerary-blocks-container" class="space-y-4">
-            <!-- Injected via renderItinerary() -->
+          <div class="pt-1">
+            <p class="text-xs text-gray-400 mb-2">You can also choose one of these tags:</p>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="sendQuickPrompt('Tell me about Culture & Mosques in Bandar')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
+                🏛️ Culture
+              </button>
+              <button onclick="sendQuickPrompt('I want Nature & Eco adventures')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
+                🌿 Nature
+              </button>
+              <button onclick="sendQuickPrompt('Recommend local Food like Ambuyat')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
+                🍽️ Food
+              </button>
+              <button onclick="sendQuickPrompt('Where to go Shopping in Brunei')" class="quick-tag flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs rounded-full border border-white/10 transition-all active:scale-95">
+                🛍️ Shopping
+              </button>
+            </div>
           </div>
-
-          <!-- Bottom Add Place Button -->
-          <div class="pt-2 border-t border-gray-100">
-            <button 
-              id="btn-add-place-block" 
-              class="w-full flex items-center gap-3 text-left hover:bg-gray-50 p-2 rounded-lg transition-colors group"
-            >
-              <div class="w-6 h-6 bg-black rounded flex items-center justify-center shrink-0">
-                <span class="text-[#F7CD4F] font-bold text-base leading-none">+</span>
-              </div>
-              <span class="text-[15px] text-black font-normal">Add Place</span>
-            </button>
-          </div>
-
         </div>
-
       </div>
 
-      <!-- Bottom Continue Button in Step 2 -->
-      <div class="absolute bottom-6 right-[20px] z-10">
-        <button 
-          id="continue-step2-btn"
-          class="flex items-center justify-center gap-2 w-[113px] h-[32px] bg-gradient-to-r from-[#B0DDD0]/30 to-[#498E79]/30 bg-[#98C2B5] rounded-[13px] shadow-md hover:brightness-105 active:scale-95 transition-all text-black text-[15px] font-medium"
-        >
-          <span>Continue</span>
-          <div class="w-4 h-4 rounded-full bg-white/40 flex items-center justify-center">
-            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
+    </main>
+
+    <div id="typing-indicator" class="hidden px-5 py-2 flex items-center gap-2 text-xs text-gray-400">
+      <div class="w-6 h-6 rounded-full bg-amber-100/10 flex items-center justify-center text-xs">🦜</div>
+      <span>BruNow is crafting your Brunei plan...</span>
+      <div class="flex gap-1 ml-1">
+        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
+        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
+        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full typing-dot"></span>
+      </div>
+    </div>
+
+    <footer class="p-3 bg-darkBg border-t border-white/10 shrink-0">
+      
+      <!-- Quick Suggestion Pill Bar -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
+        <button onclick="sendQuickPrompt('Can you generate me 1 day itinerary?')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
+          ✨ 1 Day Itinerary
+        </button>
+        <button onclick="sendQuickPrompt('Top local dishes to try in Brunei')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
+          🍱 Best Food & Ambuyat
+        </button>
+        <button onclick="sendQuickPrompt('How do I get to Kampong Ayer?')" class="shrink-0 px-3 py-1.5 bg-cardDark hover:bg-white/10 text-gray-300 rounded-full border border-white/10 transition-colors">
+          🚤 Water Village Tour
         </button>
       </div>
 
-    </div>
+      <!-- Text Input Form -->
+      <form id="chat-form" class="flex items-center gap-2 mt-1">
+        <input 
+          type="text" 
+          id="chat-input"
+          placeholder="Ask BruNow about Brunei trip..."
+          class="flex-1 h-11 px-4 bg-cardDark text-sm text-white placeholder-gray-400 rounded-full outline-none border border-white/10 focus:border-amber-400/50 transition-all"
+        />
+        <button 
+          type="submit"
+          id="send-btn"
+          class="w-11 h-11 bg-sageGreen hover:bg-[#5b7d70] rounded-full flex items-center justify-center shrink-0 shadow-lg active:scale-95 transition-all"
+        >
+          <svg class="w-5 h-5 text-white transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7" />
+          </svg>
+        </button>
+      </form>
+    </footer>
 
-    <!-- Modal Popup Dialog for Dynamic Inputs -->
-    <div id="input-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl p-5 w-full max-w-[340px] shadow-2xl border border-gray-100 flex flex-col gap-3 animate-in fade-in zoom-in-95">
-        <h4 id="modal-title" class="text-lg font-semibold text-gray-900">Add Item</h4>
-        
-        <div id="modal-fields-container" class="space-y-2">
-          <!-- Dynamic inputs will be placed here -->
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2">
-          <button id="modal-cancel-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-          <button id="modal-confirm-btn" type="button" class="px-4 py-1.5 text-xs font-medium text-white bg-[#739C8F] rounded-lg hover:bg-[#5b8074]">Add</button>
-        </div>
-      </div>
+    <!-- Notification Toast Container -->
+    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-950 font-medium text-xs px-4 py-2 rounded-full shadow-2xl z-50 transition-all">
+      Saved to Planner!
     </div>
 
   </div>
 
   <script>
-    /* App State Variables */
-    let selectedDate = { year: 2026, month: 0, day: 15 }; // Month 0 = Jan
-    let currentCalYear = 2026;
-    let currentCalMonth = 0; // January
-    let selectedDuration = '2 Days';
-    let selectedPreferences = ['Nature', 'Food', 'Culture'];
-    let modalActionType = '';
-    let targetPlaceId = null;
+    // System instruction defining BruNow's Brunei specialized persona
+    const BRUNEI_SYSTEM_INSTRUCTION = `You are "BruNow", the official AI Travel Concierge for Brunei Darussalam.
+Your sole focus is helping travelers discover Brunei's rich culture, eco-tourism, halal cuisine, and royal heritage.
 
-    /* Structured Itinerary Data (Grouped by Place Plans) */
-    let itineraryData = [
-      {
-        id: 1,
-        place: 'Royal Regalia Museum',
-        time: '9:00 AM',
-        tasks: [
-          { id: 101, text: 'Remember to bring cash.', checked: true },
-          { id: 102, text: 'Take photos', checked: true },
-          { id: 103, text: 'Visit Gift Shop', checked: false }
-        ]
+Expert Knowledge Base:
+- Attractions: Sultan Omar Ali Saifuddien Mosque, Kampong Ayer (water village), Royal Regalia Museum, Jame' 'Asr Hassanil Bolkiah Mosque, Ulu Temburong National Park (Canopy Walk), Gadong Night Market, Empire Brunei resort, Tasek Lama Recreational Park, Mangrove River Safari (proboscis monkeys).
+- Local Gastronomy: Ambuyat (sago dish with cacah dip), Udang Galah (giant freshwater prawns), Soto Pabo, Nasi Katok, Pulut Panggang, Kuih Cincin, Mr Baker's Cafe, Aminah Arif Restaurant.
+- Logistics: Currency (BND / SGD parity), DART ride-hailing app, Water Taxis (Penambang), polite dress codes for mosques.
+
+Formatting Requirement for Itineraries / Recommendations:
+When generating an itinerary or day plan, ALWAYS include a JSON block formatted exactly like this inside markdown:
+\`\`\`json
+{
+  "isItinerary": true,
+  "title": "1-Day Nature & Food Adventure",
+  "startingPoint": "Bandar Seri Begawan",
+  "schedule": [
+    {
+      "time": "8:30 AM",
+      "category": "Breakfast",
+      "place": "Mr Baker's Cafe",
+      "details": []
+    },
+    {
+      "time": "10:00 AM",
+      "category": "Nature",
+      "place": "Ulu Temburong National Park",
+      "details": ["Canopy Walk", "River Cruise"],
+      "estimatedStay": "3 hours"
+    },
+    {
+      "time": "2:00 PM",
+      "category": "Lunch",
+      "place": "Aminah Arif",
+      "recommended": ["Ambuyat", "Udang Galah"]
+    }
+  ]
+}
+\`\`\`
+For general questions, give polite, friendly, natural text answers. Keep descriptions enthusiastic and welcoming!`;
+
+    // Global conversation state
+    const chatHistory = [];
+    
+    const chatContainer = document.getElementById('chat-container');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const toast = document.getElementById('toast');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    function scrollToBottom() {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Render User Chat Bubble
+    function appendUserMessage(text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-enter flex justify-end w-full';
+      msgDiv.innerHTML = `
+        <div class="bg-userBubble text-gray-900 text-[14px] leading-relaxed py-2.5 px-4 rounded-2xl rounded-tr-none max-w-[85%] shadow-md">
+          ${escapeHtml(text)}
+        </div>
+      `;
+      chatContainer.appendChild(msgDiv);
+      scrollToBottom();
+    }
+
+    // Render Bot Text or Green Itinerary Card
+    function appendBotMessage(parsedContent) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-enter flex flex-col items-start gap-1 max-w-[95%]';
+
+      let contentHtml = '';
+
+      if (parsedContent.textBefore) {
+        contentHtml += `<p class="text-[14px] text-gray-200 leading-relaxed mb-3">${escapeHtml(parsedContent.textBefore)}</p>`;
       }
-    ];
 
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+      // If JSON Itinerary exists, render the Figma Sage Green Card
+      if (parsedContent.itinerary) {
+        const itin = parsedContent.itinerary;
+        contentHtml += `
+          <div class="w-full bg-sageGreen text-white rounded-2xl p-4 shadow-xl border border-white/20 space-y-3 font-sans">
+            
+            <!-- Card Header -->
+            <div class="border-b border-white/20 pb-2">
+              <div class="flex items-center gap-1.5 text-xs text-amber-200 font-medium mb-0.5">
+                <span>🌿</span>
+                <span>${escapeHtml(itin.title || 'Brunei Itinerary')}</span>
+              </div>
+              <div class="text-xs text-gray-100 flex items-center gap-1">
+                <span class="text-amber-300">📍</span>
+                <span>Starting Point: ${escapeHtml(itin.startingPoint || 'Bandar Seri Begawan')}</span>
+              </div>
+            </div>
 
-    /* Helper: Format date string as DD/MM/YY */
-    function formatDateString(dateObj) {
-      if (!dateObj) return 'dd/mm/yy';
-      const day = String(dateObj.day).padStart(2, '0');
-      const month = String(dateObj.month + 1).padStart(2, '0');
-      const year = String(dateObj.year).slice(-2);
-      return `${day}/${month}/${year}`;
+            <!-- Schedule Items List -->
+            <div class="space-y-3 pt-1">
+              ${(itin.schedule || []).map(item => `
+                <div class="space-y-1 text-xs border-b border-white/10 pb-2.5 last:border-0 last:pb-0">
+                  <div class="flex items-center justify-between text-amber-200 font-semibold">
+                    <span>${escapeHtml(item.time)}</span>
+                    ${item.estimatedStay ? `<span class="text-[10px] bg-white/15 px-2 py-0.5 rounded-full text-white">Stay: ${escapeHtml(item.estimatedStay)}</span>` : ''}
+                  </div>
+                  <div class="text-sm font-medium text-white flex items-center gap-1.5">
+                    <span>${getCategoryIcon(item.category)}</span>
+                    <span>${escapeHtml(item.place)}</span>
+                  </div>
+                  
+                  ${item.details && item.details.length ? `
+                    <ul class="pl-4 space-y-0.5 text-gray-100 list-disc">
+                      ${item.details.map(d => `<li>${escapeHtml(d)}</li>`).join('')}
+                    </ul>
+                  ` : ''}
+
+                  ${item.recommended && item.recommended.length ? `
+                    <div class="pt-1 text-[11px] text-amber-100">
+                      <span class="font-medium text-amber-300">Recommended:</span>
+                      <span class="text-gray-100">${item.recommended.join(', ')}</span>
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Add to Planner Action -->
+            <div class="pt-2 border-t border-white/20 flex justify-end">
+              <button 
+                onclick="saveItineraryToPlanner()"
+                class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-gray-950 text-xs font-semibold rounded-lg shadow transition-all active:scale-95 flex items-center gap-1"
+              >
+                <span>➕ Save to My Itinerary</span>
+              </button>
+            </div>
+
+          </div>
+        `;
+      }
+
+      if (parsedContent.textAfter) {
+        contentHtml += `<p class="text-[14px] text-gray-200 leading-relaxed mt-3">${escapeHtml(parsedContent.textAfter)}</p>`;
+      }
+
+      msgDiv.innerHTML = `
+        <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 w-full">
+          ${contentHtml}
+        </div>
+      `;
+
+      chatContainer.appendChild(msgDiv);
+      scrollToBottom();
     }
 
-    /* Helper: Get days in specific month */
-    function getDaysInMonth(year, month) {
-      return new Date(year, month + 1, 0).getDate();
+    function getCategoryIcon(category) {
+      if (!category) return '📍';
+      const cat = category.toLowerCase();
+      if (cat.includes('breakfast') || cat.includes('lunch') || cat.includes('food') || cat.includes('dinner')) return '🍽️';
+      if (cat.includes('nature') || cat.includes('park') || cat.includes('river')) return '🌳';
+      if (cat.includes('culture') || cat.includes('mosque') || cat.includes('museum')) return '🕌';
+      if (cat.includes('shop')) return '🛍️';
+      return '📌';
     }
 
-    /* Helper: Get starting weekday (0 = Sun, 1 = Mon...) */
-    function getFirstDayOfWeek(year, month) {
-      return new Date(year, month, 1).getDay();
-    }
-
-    /* Helper: Escape HTML strings to prevent layout breaks */
     function escapeHtml(str) {
       if (!str) return '';
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
-    /* Render 1-31 Calendar Grid */
-    function renderCalendar() {
-      const monthSelect = document.getElementById('cal-month-select');
-      const yearSelect = document.getElementById('cal-year-select');
-      const gridContainer = document.getElementById('calendar-days-grid');
+    // Call Gemini 3 Flash API with retry and backoff
+    async function callGeminiAPI(userQuery) {
+      chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
 
-      monthSelect.value = currentCalMonth;
-      yearSelect.value = currentCalYear;
-      gridContainer.innerHTML = '';
+      const apiKey = ""; // Runtime automatically inserts API key when empty
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-      const totalDays = getDaysInMonth(currentCalYear, currentCalMonth);
-      const startDay = getFirstDayOfWeek(currentCalYear, currentCalMonth);
-
-      // Render empty padding cells
-      for (let i = 0; i < startDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'w-[22px] h-[22px]';
-        gridContainer.appendChild(emptyCell);
-      }
-
-      // Render day cells from 1 to 31
-      for (let day = 1; day <= totalDays; day++) {
-        const dayBtn = document.createElement('button');
-        dayBtn.type = 'button';
-        dayBtn.textContent = day;
-        
-        const isSelected = selectedDate &&
-          selectedDate.year === currentCalYear &&
-          selectedDate.month === currentCalMonth &&
-          selectedDate.day === day;
-
-        dayBtn.className = `day-btn w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] ${
-          isSelected ? 'selected' : 'text-black'
-        }`;
-
-        dayBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selectedDate = {
-            year: currentCalYear,
-            month: currentCalMonth,
-            day: day
-          };
-          
-          document.getElementById('selected-date-text').textContent = formatDateString(selectedDate);
-          document.getElementById('calendar-popup').classList.add('hidden');
-          renderCalendar();
-        });
-
-        gridContainer.appendChild(dayBtn);
-      }
-    }
-
-    /* Toggle Task Checkmark State */
-    window.toggleTaskCheck = function(placeId, taskId) {
-      const placeObj = itineraryData.find(p => p.id === placeId);
-      if (placeObj) {
-        const taskObj = placeObj.tasks.find(t => t.id === taskId);
-        if (taskObj) {
-          taskObj.checked = !taskObj.checked;
-          renderItinerary();
+      const payload = {
+        contents: chatHistory,
+        systemInstruction: {
+          parts: [{ text: BRUNEI_SYSTEM_INSTRUCTION }]
         }
-      }
-    };
-
-    /* Open Add Task Modal for a Specific Place Block */
-    window.openAddTaskModal = function(placeId) {
-      targetPlaceId = placeId;
-      modalActionType = 'task';
-      
-      document.getElementById('modal-title').textContent = 'Add Another Task';
-      const container = document.getElementById('modal-fields-container');
-      container.innerHTML = `
-        <input 
-          type="text" 
-          id="modal-input-task" 
-          placeholder="e.g. Buy souvenirs" 
-          class="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
-        />
-      `;
-      document.getElementById('input-modal').classList.remove('hidden');
-      document.getElementById('modal-input-task').focus();
-    };
-
-    /* Render Structured Itinerary Blocks in Step 2 */
-    function renderItinerary() {
-      const container = document.getElementById('itinerary-blocks-container');
-      if (!container) return;
-      container.innerHTML = '';
-
-      itineraryData.forEach((item, index) => {
-        const block = document.createElement('div');
-        block.className = 'place-plan-block space-y-3';
-
-        // Block Content (📍 Place, ⏰ Time, 📝 Notes and Checklists)
-        block.innerHTML = `
-          <div class="space-y-1.5 text-[15px]">
-            <div class="flex items-center gap-2">
-              <span class="text-black font-normal flex items-center gap-1 shrink-0">📍 Place :</span>
-              <span class="text-black font-normal leading-tight">${escapeHtml(item.place)}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-black font-normal flex items-center gap-1 shrink-0">⏰ Time :</span>
-              <span class="text-black font-normal leading-tight">${escapeHtml(item.time)}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-black font-normal flex items-center gap-1 shrink-0">📝 Notes :</span>
-            </div>
-          </div>
-
-          <!-- Dynamic Task List for this specific plan -->
-          <div class="task-list space-y-2.5 pt-0.5">
-            ${item.tasks.map(task => `
-              <div 
-                class="task-item flex items-center gap-3 cursor-pointer group"
-                onclick="toggleTaskCheck(${item.id}, ${task.id})"
-              >
-                <div class="checkbox-box w-[17px] h-[16px] rounded-[3px] ${task.checked ? 'border-[#739C8F] bg-[#739C8F]' : 'border-[rgba(64,64,64,0.35)]'} flex items-center justify-center transition-all shrink-0">
-                  <svg class="check-icon w-3 h-3 text-white ${task.checked ? '' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span class="text-[13px] text-black font-normal">${escapeHtml(task.text)}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <!-- Add Another Task Button for this Plan -->
-          <div class="pt-1">
-            <button 
-              type="button"
-              onclick="openAddTaskModal(${item.id})" 
-              class="flex items-center gap-2.5 text-left hover:bg-gray-50 px-1 py-1 rounded transition-colors group"
-            >
-              <div class="w-5 h-5 bg-black rounded flex items-center justify-center shrink-0">
-                <span class="text-[#F7CD4F] font-bold text-sm leading-none">+</span>
-              </div>
-              <span class="text-[13px] text-black font-normal">Add Another Task</span>
-            </button>
-          </div>
-        `;
-
-        container.appendChild(block);
-
-        // Add a dividing line after each plan block to cleanly separate plans
-        if (index < itineraryData.length) {
-          const hr = document.createElement('div');
-          hr.className = 'w-full my-4 border-t border-gray-200';
-          container.appendChild(hr);
-        }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCalendar();
-
-      const dateTriggerBtn = document.getElementById('date-trigger-btn');
-      const calendarPopup = document.getElementById('calendar-popup');
-      const calPrevBtn = document.getElementById('cal-prev-btn');
-      const calNextBtn = document.getElementById('cal-next-btn');
-      const monthSelect = document.getElementById('cal-month-select');
-      const yearSelect = document.getElementById('cal-year-select');
-
-      // Toggle Calendar Visibility
-      dateTriggerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        calendarPopup.classList.toggle('hidden');
-      });
-
-      calendarPopup.addEventListener('click', (e) => e.stopPropagation());
-      document.addEventListener('click', () => calendarPopup.classList.add('hidden'));
-
-      // Calendar Dropdown Navigation
-      monthSelect.addEventListener('change', (e) => {
-        currentCalMonth = parseInt(e.target.value);
-        renderCalendar();
-      });
-
-      yearSelect.addEventListener('change', (e) => {
-        currentCalYear = parseInt(e.target.value);
-        renderCalendar();
-      });
-
-      calPrevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (currentCalMonth === 0) {
-          currentCalMonth = 11;
-          currentCalYear--;
-        } else {
-          currentCalMonth--;
-        }
-        renderCalendar();
-      });
-
-      calNextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (currentCalMonth === 11) {
-          currentCalMonth = 0;
-          currentCalYear++;
-        } else {
-          currentCalMonth++;
-        }
-        renderCalendar();
-      });
-
-      // Duration Selection Logic
-      const durationOptions = document.querySelectorAll('.duration-option');
-      durationOptions.forEach(option => {
-        option.addEventListener('click', () => {
-          const val = option.getAttribute('data-value');
-          selectedDuration = val;
-
-          durationOptions.forEach(opt => {
-            const box = opt.querySelector('.checkbox-box');
-            const checkIcon = opt.querySelector('.check-icon');
-            if (opt.getAttribute('data-value') === val) {
-              box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all';
-              if (checkIcon) checkIcon.classList.remove('hidden');
-            } else {
-              box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all';
-              if (checkIcon) checkIcon.classList.add('hidden');
-            }
-          });
-        });
-      });
-
-      // Preference Selection Logic
-      const prefOptions = document.querySelectorAll('.pref-option');
-      prefOptions.forEach(option => {
-        option.addEventListener('click', () => {
-          const val = option.getAttribute('data-value');
-          const box = option.querySelector('.checkbox-box');
-          const checkIcon = option.querySelector('.check-icon');
-
-          if (selectedPreferences.includes(val)) {
-            selectedPreferences = selectedPreferences.filter(p => p !== val);
-            box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[rgba(64,64,64,0.35)] flex items-center justify-center transition-all';
-            if (checkIcon) checkIcon.classList.add('hidden');
-          } else {
-            selectedPreferences.push(val);
-            box.className = 'checkbox-box w-[17px] h-[16px] rounded-[3px] border border-[#739C8F] bg-[#739C8F] flex items-center justify-center transition-all';
-            if (checkIcon) checkIcon.classList.remove('hidden');
-          }
-        });
-      });
-
-      // Navigation: Step 1 -> Step 2 transition
-      const continueBtn = document.getElementById('continue-btn');
-      const step1View = document.getElementById('step-1-view');
-      const step2View = document.getElementById('step-2-view');
-      const backToStep1Btn = document.getElementById('back-to-step1-btn');
-
-      continueBtn.addEventListener('click', () => {
-        step1View.classList.add('hidden');
-        step2View.classList.remove('hidden');
-        step2View.classList.add('flex');
-        renderItinerary();
-      });
-
-      backToStep1Btn.addEventListener('click', () => {
-        step2View.classList.add('hidden');
-        step2View.classList.remove('flex');
-        step1View.classList.remove('hidden');
-      });
-
-      // Modal Input Dialog Handlers
-      const inputModal = document.getElementById('input-modal');
-      const modalCancelBtn = document.getElementById('modal-cancel-btn');
-      const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-
-      const closeModal = () => {
-        inputModal.classList.add('hidden');
       };
 
-      modalCancelBtn.addEventListener('click', closeModal);
+      let attempts = 0;
+      const maxAttempts = 3;
 
-      // Add New Place Block Button Event
-      document.getElementById('btn-add-place-block').addEventListener('click', () => {
-        modalActionType = 'place_block';
-        document.getElementById('modal-title').textContent = 'Add New Place / Plan';
-        const container = document.getElementById('modal-fields-container');
-        container.innerHTML = `
-          <div class="space-y-2">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">📍 Place Name</label>
-              <input 
-                type="text" 
-                id="modal-input-place" 
-                placeholder="e.g. Sultan Omar Ali Saifuddien Mosque" 
-                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">⏰ Time</label>
-              <input 
-                type="text" 
-                id="modal-input-time" 
-                placeholder="e.g. 10:30 AM" 
-                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">📝 Initial Note / Task</label>
-              <input 
-                type="text" 
-                id="modal-input-note" 
-                placeholder="e.g. Remove shoes before entering" 
-                class="w-full px-3 py-1.5 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#739C8F]"
-              />
-            </div>
-          </div>
-        `;
-        inputModal.classList.remove('hidden');
-        document.getElementById('modal-input-place').focus();
-      });
+      while (attempts < maxAttempts) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
 
-      // Handle Modal Confirm Button
-      modalConfirmBtn.addEventListener('click', () => {
-        if (modalActionType === 'task') {
-          const inputEl = document.getElementById('modal-input-task');
-          const val = inputEl ? inputEl.value.trim() : '';
-          if (val && targetPlaceId) {
-            const placeObj = itineraryData.find(p => p.id === targetPlaceId);
-            if (placeObj) {
-              placeObj.tasks.push({
-                id: Date.now(),
-                text: val,
-                checked: false
-              });
-              renderItinerary();
-            }
+          if (!response.ok) {
+            throw new Error(`API Error ${response.status}`);
           }
-        } else if (modalActionType === 'place_block') {
-          const placeVal = document.getElementById('modal-input-place').value.trim() || 'New Destination';
-          const timeVal = document.getElementById('modal-input-time').value.trim() || '12:00 PM';
-          const noteVal = document.getElementById('modal-input-note').value.trim() || 'Explore area';
 
-          const newPlaceObj = {
-            id: Date.now(),
-            place: placeVal,
-            time: timeVal,
-            tasks: [
-              { id: Date.now() + 1, text: noteVal, checked: false }
-            ]
-          };
+          const data = await response.json();
+          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't fetch that right now. Please try again!";
 
-          itineraryData.push(newPlaceObj);
-          renderItinerary();
+          // Add model response to history
+          chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+
+          return parseGeminiResponse(responseText);
+        } catch (err) {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            return {
+              textBefore: "Sorry, I had trouble connecting to BruNow AI servers. Please check your network and try again!"
+            };
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts)));
         }
+      }
+    }
 
-        closeModal();
-      });
+    // Parse JSON block out of response if present
+    function parseGeminiResponse(text) {
+      const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch && jsonMatch[1]) {
+        try {
+          const parsedJson = JSON.parse(jsonMatch[1]);
+          const parts = text.split(/```json[\s\S]*?```/);
+          return {
+            textBefore: parts[0]?.trim(),
+            itinerary: parsedJson,
+            textAfter: parts[1]?.trim()
+          };
+        } catch (e) {
+          // Fallback if JSON parse fails
+        }
+      }
+      return { textBefore: text };
+    }
 
-      document.getElementById('continue-step2-btn').addEventListener('click', () => {
-        alert('Itinerary finalized successfully!');
-      });
+    // Handle user input submit
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = chatInput.value.trim();
+      if (!query) return;
+
+      chatInput.value = '';
+      appendUserMessage(query);
+
+      typingIndicator.classList.remove('hidden');
+      scrollToBottom();
+
+      const botResult = await callGeminiAPI(query);
+
+      typingIndicator.classList.add('hidden');
+      appendBotMessage(botResult);
+    });
+
+    window.sendQuickPrompt = function(promptText) {
+      chatInput.value = promptText;
+      chatForm.dispatchEvent(new Event('submit'));
+    };
+
+    window.saveItineraryToPlanner = function() {
+      showToast("Saved to your Brunei Itinerary Planner!");
+    };
+
+    document.getElementById('reset-chat-btn').addEventListener('click', () => {
+      chatHistory.length = 0;
+      chatContainer.innerHTML = `
+        <div class="chat-enter flex flex-col items-start gap-1 max-w-[90%]">
+          <div class="bg-cardDark text-gray-100 text-[14px] leading-relaxed p-4 rounded-2xl rounded-tl-none border border-white/5 space-y-3">
+            <p>Hi! 👋 Chat history reset. How can I help with your Brunei trip?</p>
+          </div>
+        </div>
+      `;
+      showToast("Chat reset");
     });
   </script>
 </body>
