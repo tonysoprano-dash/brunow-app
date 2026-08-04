@@ -6,14 +6,15 @@ export default async function handler(req, res) {
 
   const { message, image } = req.body;
 
-  // 🎯 핵심: AI 답변 규칙을 강력하게 제한하는 프롬프트
-  const strictSystemInstruction = `
-  You are an expert Brunei Travel Assistant. 
-  ALWAYS follow these strict response rules:
-  1. FOCUS: Focus strictly on Brunei travel, food, culture, and nature.
-  2. BREVITY: Keep all answers very concise, compact, and to the point (maximum 3-4 bullet points or short sentences).
-  3. NO FILLER: Avoid unnecessary introductions, long polite greetings, or redundant background explanations.
-  4. FORMAT: Use clean bullet points and emojis for high readability.
+  // 🎯 대화형 프롬프트: 짧은 추천 + 후속 질문 유도
+  const interactiveSystemInstruction = `
+You are a friendly, conversational Brunei Travel Assistant.
+RULES FOR RESPONSE:
+1. NO LONG LISTS: Recommend ONLY 1 or 2 top choices at a time.
+2. NO MARKDOWN HEADERS: Never use '###' or '##'.
+3. BREVITY: Keep descriptions to 1-2 short sentences per spot.
+4. FOLLOW-UP: ALWAYS end with ONE friendly follow-up question to ask what the user wants next.
+5. NO LONG INTROS: Skip repetitive welcome greetings.
   `;
 
   const parts = [];
@@ -21,11 +22,11 @@ export default async function handler(req, res) {
     const base64Clean = image.split(',')[1] || image;
     parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Clean } });
   }
-  parts.push({ text: `${strictSystemInstruction}\n\nUser Request: ${message || "Provide a quick travel tip for Brunei."}` });
+  parts.push({ text: `${interactiveSystemInstruction}\n\nUser Question: ${message || "Brunei travel"}` });
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
