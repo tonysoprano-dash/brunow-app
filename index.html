@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Brunow Chatbot</title>
+    <title>Discover Brunei - Travel Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
@@ -46,10 +46,10 @@
             }
         }
 
-        /* Header Styling - Height expanded for vertical stack */
+        /* Header Styling */
         .app-header {
-            min-height: 82px;
-            padding: 8px 16px;
+            height: 70px;
+            padding: 0 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -58,26 +58,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Logo Wrapper */
-        .logo-crop-wrapper {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: transparent;
-        }
-
-        .logo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scale(1.18);
-        }
-
+        /* Chat Container */
         .chat-scroll {
             flex: 1;
             overflow-y: auto;
@@ -146,7 +127,7 @@
             transform: translateY(-1px);
         }
 
-        /* Input Toolbar */
+        /* Toolbar & Inputs */
         .input-toolbar {
             background: #303735;
             padding: 12px 14px 20px 14px;
@@ -164,9 +145,6 @@
             align-items: center;
             padding: 0 14px;
             height: 42px;
-            cursor: text;
-            position: relative;
-            z-index: 5;
         }
 
         .input-box input {
@@ -174,9 +152,8 @@
             border: none;
             background: transparent;
             outline: none;
-            font-size: 14px;
-            color: #111111 !important;
-            pointer-events: auto;
+            font-size: 13px;
+            color: #111111;
         }
 
         .btn-icon {
@@ -234,7 +211,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Modals */
+        /* Camera & Settings Modal */
         .modal-overlay {
             position: absolute;
             inset: 0;
@@ -258,7 +235,7 @@
             gap: 16px;
         }
 
-        /* Typing Dots */
+        /* Loading Dots Animation */
         .typing-dot {
             width: 6px;
             height: 6px;
@@ -275,8 +252,21 @@
             40% { transform: scale(1.0); }
         }
 
+        /* Explicit Hidden Utility to prevent overlay blocking touch/clicks */
         .hidden {
             display: none !important;
+        }
+
+        .input-box {
+            cursor: text;
+            position: relative;
+            z-index: 5;
+        }
+
+        .input-box input {
+            font-size: 14px;
+            color: #111111 !important;
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -290,15 +280,9 @@
                     <path d="M15 19.92L8.48 13.4C7.71 12.63 7.71 11.37 8.48 10.6L15 4.08" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
-            
-            <!-- Centered Vertical Stack: Logo TOP, Title BOTTOM -->
-            <div class="flex flex-col items-center justify-center gap-1">
-                <div class="logo-crop-wrapper">
-                    <img src="logo.png" alt="Brunow Logo" class="logo-img" onerror="this.parentElement.style.display='none'">
-                </div>
-                <h1 class="font-semibold text-xs text-white tracking-tight leading-none">Brunow Chatbot</h1>
+            <div class="text-center">
+                <h1 class="font-semibold text-lg text-white tracking-tight">Brunow Chatbot</h1>
             </div>
-
             <button class="btn-icon" style="background: transparent;" id="settingsBtn" title="API Key Settings">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <circle cx="12" cy="12" r="3"></circle>
@@ -357,6 +341,7 @@
             <button id="removeImgBtn" class="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center text-sm">&times;</button>
         </div>
 
+        <!-- Input Toolbar -->
         <footer class="input-toolbar">
             <!-- Camera Trigger Button -->
             <button class="btn-icon" id="camTriggerBtn" title="Take photo">
@@ -391,14 +376,14 @@
         <div class="modal-overlay hidden" id="settingsModal">
             <div class="modal-card">
                 <div class="flex justify-between items-center text-sm font-semibold">
-                    <span>API Settings</span>
+                    <span>API & Vercel Settings</span>
                     <button id="closeSettingsBtn" class="text-gray-400 hover:text-white">&times;</button>
                 </div>
                 <div class="text-xs text-gray-300 leading-relaxed">
-                    Set your custom Gemini API key below if needed.
+                    When deployed on Vercel, requests route through <code class="bg-black/30 px-1 py-0.5 rounded text-emerald-400">/api/chat</code> using your environment variable.
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] text-gray-400">Direct Gemini API Key:</label>
+                    <label class="text-[11px] text-gray-400">Direct Gemini API Key (Optional for Preview):</label>
                     <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-emerald-500">
                 </div>
                 <div class="flex justify-end gap-2 mt-2">
@@ -432,13 +417,11 @@
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
         const apiKeyInput = document.getElementById('apiKeyInput');
 
-        // Permanent Default Backup Key so it NEVER fails on browser cache clear
-        const HARDCODED_BACKUP_KEY = "AIzaSyAFuvkWKXq6e_t5IIgdZy3mmALiQvC-0qs";
-
         let currentBase64Image = null;
         let mediaStream = null;
 
-        apiKeyInput.value = localStorage.getItem('gemini_api_key') || HARDCODED_BACKUP_KEY;
+        // Load saved API key from localStorage if available
+        apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
 
         settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
@@ -456,14 +439,17 @@
             const text = userInput.value.trim();
             if (!text && !currentBase64Image) return;
 
+            // Render user bubble
             appendUserMessage(text, currentBase64Image);
 
             const promptToSend = text;
             const imageToSend = currentBase64Image;
 
+            // Reset input
             userInput.value = '';
             clearImagePreview();
 
+            // Render bot typing indicator
             const loadingBubble = appendBotLoading();
 
             try {
@@ -478,11 +464,10 @@
         }
 
         async function callGeminiAI(prompt, imageBase64) {
-            // Use saved key or fallback key
-            const userApiKey = localStorage.getItem('gemini_api_key') || HARDCODED_BACKUP_KEY;
+            const userApiKey = localStorage.getItem('gemini_api_key') || "";
             const systemPrompt = "You are a warm, expert Brunei Travel Assistant. Help users plan itineraries, recommend authentic Brunei food (like Ambuyat), culture (Mosques, Kampong Ayer), and nature spots (Ulu Temburong). Keep responses concise, nicely formatted with emojis, clear bullet points, and actionable tips.";
 
-            // 1. Try Vercel Serverless Endpoint
+            // 1. Try Vercel Serverless Endpoint first
             try {
                 const vercelRes = await fetch('/api/chat', {
                     method: 'POST',
@@ -495,86 +480,63 @@
                     if (data.reply) return data.reply;
                 }
             } catch (e) {
-                // Fallback to direct Gemini API
+                // Vercel backend route not present in preview; fallback to direct API
             }
 
-            if (!userApiKey) {
-                throw new Error("API Key가 설정되지 않았습니다. 우측 상단 ⚙️ 버튼을 눌러 API Key를 입력해 주세요.");
+            // 2. Direct Gemini API call (using gemini-3-flash-preview)
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+            
+            const parts = [];
+            if (imageBase64) {
+                const base64Clean = imageBase64.split(',')[1] || imageBase64;
+                parts.push({
+                    inlineData: {
+                        mimeType: "image/jpeg",
+                        data: base64Clean
+                    }
+                });
+            }
+            parts.push({ text: `${systemPrompt}\n\nUser Question: ${prompt || "Analyze this image and give travel advice for Brunei."}` });
+
+            const payload = {
+                contents: [{ parts: parts }]
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error?.message || `API Error: ${response.status}`);
             }
 
-            // Models to try in order
-            const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-            let lastError = null;
-
-            for (const model of models) {
-                try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
-                    
-                    const parts = [];
-                    if (imageBase64) {
-                        const base64Clean = imageBase64.split(',')[1] || imageBase64;
-                        parts.push({
-                            inlineData: {
-                                mimeType: "image/jpeg",
-                                data: base64Clean
-                            }
-                        });
-                    }
-                    parts.push({ text: `${systemPrompt}\n\nUser Question: ${prompt || "Analyze this image and give travel advice for Brunei."}` });
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts }] })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        return data.candidates[0].content.parts[0].text;
-                    }
-
-                    if (data.error) {
-                        lastError = `[${model}] ${data.error.message || data.error.status}`;
-                    }
-                } catch (err) {
-                    lastError = err.message;
-                }
-            }
-
-            throw new Error(lastError || "Gemini API 호출에 실패했습니다.");
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from Gemini.";
         }
 
         function appendUserMessage(text, imageBase64) {
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text && !currentBase64Image) return;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex w-full justify-end';
 
-            appendUserMessage(text, currentBase64Image);
-
-            const promptToSend = text;
-            const imageToSend = currentBase64Image;
-
-            userInput.value = '';
-            clearImagePreview();
-
-            const loadingBubble = appendBotLoading();
-
-            try {
-                const responseText = await callGeminiAI(promptToSend, imageToSend);
-                loadingBubble.remove();
-                appendBotMessage(responseText);
-            } catch (err) {
-                console.error("Chat error:", err);
-                loadingBubble.remove();
-                appendBotMessage(`⚠️ 오류 발생:\n${err.message}\n\n💡 해결 방법:\n1. Google AI Studio(aistudio.google.com)에서 새로 발급받은 API Key를 우측 상단 ⚙️ 설정 아이콘을 눌러 입력해 보세요.`);
-            }
+            let imgHtml = imageBase64 ? `<img src="${imageBase64}" alt="user capture">` : '';
+            wrapper.innerHTML = `
+                <div class="user-bubble">
+                    ${imgHtml}
+                    ${text ? `<p>${escapeHtml(text)}</p>` : ''}
+                </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            scrollToBottom();
         }
 
         function appendBotMessage(text) {
             const wrapper = document.createElement('div');
             wrapper.className = 'flex w-full justify-start';
             
+            // Basic formatting for line breaks and bullet points
             const formattedText = escapeHtml(text)
                 .replace(/\n/g, '<br>')
                 .replace(/•/g, '&bull;');
@@ -687,6 +649,7 @@
             micBtn.addEventListener('click', () => showToast("Voice recognition not supported in this browser."));
         }
 
+        // Custom Toast Notification instead of alert()
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'fixed top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-4 py-2 rounded-full z-50 shadow-lg border border-white/10';
@@ -695,13 +658,15 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
+        // Ensure clicking input wrapper focuses the text field
         const inputBoxWrapper = document.querySelector('.input-box');
-        if (inputBoxWrapper) {ㅁ
+        if (inputBoxWrapper) {
             inputBoxWrapper.addEventListener('click', () => {
                 userInput.focus();
             });
         }
 
+        // Key Listeners
         sendBtn.addEventListener('click', sendMessage);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
