@@ -6,15 +6,14 @@ export default async function handler(req, res) {
 
   const { message, image } = req.body;
 
-  // 🎯 대화형 프롬프트: 짧은 추천 + 후속 질문 유도
-  const interactiveSystemInstruction = `
-You are a friendly, conversational Brunei Travel Assistant.
-RULES FOR RESPONSE:
-1. NO long lists: Recommend ONLY 1 or 2 top choices at a time instead of 4-5 items.
-2. NO markdown headers like '###' or complex formatting. Keep text natural and simple.
-3. Keep descriptions super short (1-2 sentences per spot).
-4. ALWAYS end with 1 relevant follow-up question to keep the conversation going (e.g., "Would you like more details on this, or shall we explore food spots next?").
-5. Use a warm tone with 1-2 emojis.
+  // 🎯 핵심: AI 답변 규칙을 강력하게 제한하는 프롬프트
+  const strictSystemInstruction = `
+  You are an expert Brunei Travel Assistant. 
+  ALWAYS follow these strict response rules:
+  1. FOCUS: Focus strictly on Brunei travel, food, culture, and nature.
+  2. BREVITY: Keep all answers very concise, compact, and to the point (maximum 3-4 bullet points or short sentences).
+  3. NO FILLER: Avoid unnecessary introductions, long polite greetings, or redundant background explanations.
+  4. FORMAT: Use clean bullet points and emojis for high readability.
   `;
 
   const parts = [];
@@ -22,7 +21,7 @@ RULES FOR RESPONSE:
     const base64Clean = image.split(',')[1] || image;
     parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Clean } });
   }
-  parts.push({ text: `${interactiveSystemInstruction}\n\nUser Question: ${message || "Brunei travel"}` });
+  parts.push({ text: `${strictSystemInstruction}\n\nUser Request: ${message || "Provide a quick travel tip for Brunei."}` });
 
   try {
     const response = await fetch(
