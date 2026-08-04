@@ -291,7 +291,6 @@
                 </svg>
             </button>
             
-            <!-- Vertical Stack: Logo TOP, Title BOTTOM -->
             <div class="flex flex-col items-center justify-center gap-1">
                 <div class="logo-crop-wrapper">
                     <img src="logo.png" alt="Brunow Logo" class="logo-img" onerror="this.onerror=null; this.src='https://placehold.co/80x80/739C8F/ffffff?text=Brunow';">
@@ -308,7 +307,6 @@
         </header>
 
         <main class="chat-scroll" id="chatContainer">
-            <!-- Welcome Bot Card -->
             <div class="flex w-full justify-start">
                 <div class="bot-card">
                     <p class="mb-3 text-[13px]">Hi! 👋 I'd be happy to help you explore Brunei.<br>Before I create your itinerary, could you tell me a little more?</p>
@@ -358,7 +356,6 @@
         </div>
 
         <footer class="input-toolbar">
-            <!-- Camera Trigger Button -->
             <button class="btn-icon" id="camTriggerBtn" title="Take photo">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#706D6D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -366,12 +363,10 @@
                 </svg>
             </button>
 
-            <!-- Text Input -->
             <div class="input-box">
                 <input type="text" id="userInput" placeholder="Ask anything about Brunei..." autocomplete="off">
             </div>
 
-            <!-- Voice Mic Button -->
             <button class="btn-icon accent" id="micBtn" title="Voice Input">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M12 15C13.66 15 15 13.66 15 12V6C15 4.34 13.66 3 12 3C10.34 3 9 4.34 9 6V12C9 13.66 10.34 15 12 15Z" fill="white"/>
@@ -379,7 +374,6 @@
                 </svg>
             </button>
 
-            <!-- Send Button -->
             <button class="btn-icon primary" id="sendBtn" title="Send Message">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M7.4 6.32L15.89 3.49C19.7 2.22 21.77 4.3 20.51 8.11L17.68 16.6C15.78 22.31 12.66 22.31 10.76 16.6L9.92 14.08L7.4 13.24C1.69 11.34 1.69 8.23 7.4 6.32Z" fill="white"/>
@@ -435,7 +429,6 @@
         let currentBase64Image = null;
         let mediaStream = null;
 
-        // Load saved API key from localStorage
         apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
 
         settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
@@ -485,7 +478,15 @@
         }
 
         async function callGeminiAI(prompt, imageBase64, userApiKey) {
-            const systemPrompt = "You are a warm, expert Brunei Travel Assistant. Help users plan itineraries, recommend authentic Brunei food (like Ambuyat), culture (Mosques, Kampong Ayer), and nature spots (Ulu Temburong). Keep responses concise, nicely formatted with emojis, clear bullet points, and actionable tips.";
+            const systemPrompt = `
+You are a friendly, concise Brunei Travel Assistant.
+STRICT RULES:
+1. NO LONG LISTS: Recommend ONLY 1 or 2 top choices at a time.
+2. NO MARKDOWN HEADERS: Never use '###' or '##'.
+3. BREVITY: Keep descriptions to 1-2 short sentences per spot.
+4. FOLLOW-UP: ALWAYS end with ONE friendly follow-up question to ask what the user wants next.
+5. NO LONG INTROS: Skip repetitive welcome greetings.
+`;
 
             // 1. Try Vercel Serverless Endpoint first
             try {
@@ -503,12 +504,11 @@
                 // Vercel serverless route fallback
             }
 
-            // 2. Direct Gemini API call with Multi-Model Fallback Sequence
+            // 2. Direct Gemini API call with valid active models (gemini-2.5-flash removed obsolete pro/1.5 models)
             const modelsToTry = [
                 'gemini-2.5-flash',
                 'gemini-2.0-flash',
-                'gemini-1.5-flash',
-                'gemini-1.5-pro'
+                'gemini-flash-latest'
             ];
 
             const parts = [];
