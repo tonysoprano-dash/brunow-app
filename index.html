@@ -432,10 +432,13 @@
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
         const apiKeyInput = document.getElementById('apiKeyInput');
 
+        // Permanent Default Backup Key so it NEVER fails on browser cache clear
+        const HARDCODED_BACKUP_KEY = "AIzaSyAFuvkWKXq6e_t5IIgdZy3mmALiQvC-0qs";
+
         let currentBase64Image = null;
         let mediaStream = null;
 
-        apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+        apiKeyInput.value = localStorage.getItem('gemini_api_key') || HARDCODED_BACKUP_KEY;
 
         settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
@@ -475,7 +478,8 @@
         }
 
         async function callGeminiAI(prompt, imageBase64) {
-            const userApiKey = localStorage.getItem('gemini_api_key') || "";
+            // Use saved key or fallback to hardcoded default key
+            const userApiKey = localStorage.getItem('gemini_api_key') || HARDCODED_BACKUP_KEY;
             const systemPrompt = "You are a warm, expert Brunei Travel Assistant. Help users plan itineraries, recommend authentic Brunei food (like Ambuyat), culture (Mosques, Kampong Ayer), and nature spots (Ulu Temburong). Keep responses concise, nicely formatted with emojis, clear bullet points, and actionable tips.";
 
             // 1. Try Vercel Serverless Endpoint
@@ -494,7 +498,7 @@
                 // Fallback to direct Gemini API
             }
 
-            // 2. Direct Gemini API call
+            // 2. Direct Gemini API call (Fallback with hardcoded key)
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
             
             const parts = [];
