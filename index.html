@@ -46,7 +46,7 @@
             }
         }
 
-        /* Header Styling - Height expanded for vertical stack */
+        /* Header Styling - Vertical Stack for Logo TOP & Title BOTTOM */
         .app-header {
             min-height: 82px;
             padding: 8px 16px;
@@ -284,7 +284,6 @@
 <body>
 
     <div class="app-frame">
-        <!-- Header: Logo TOP, Title BOTTOM -->
         <header class="app-header">
             <button class="btn-icon" style="background: transparent;" id="backBtn" aria-label="Back">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -358,7 +357,6 @@
             <button id="removeImgBtn" class="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center text-sm">&times;</button>
         </div>
 
-        <!-- Input Toolbar -->
         <footer class="input-toolbar">
             <!-- Camera Trigger Button -->
             <button class="btn-icon" id="camTriggerBtn" title="Take photo">
@@ -437,7 +435,7 @@
         let currentBase64Image = null;
         let mediaStream = null;
 
-        // Load saved API key from localStorage if available
+        // Load saved API key from localStorage
         apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
 
         settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
@@ -458,7 +456,6 @@
             const text = userInput.value.trim();
             if (!text && !currentBase64Image) return;
 
-            // Check if API Key exists
             const userApiKey = localStorage.getItem('gemini_api_key');
             if (!userApiKey) {
                 settingsModal.classList.remove('hidden');
@@ -506,9 +503,14 @@
                 // Vercel serverless route fallback
             }
 
-            // 2. Direct Gemini API call (Standard gemini-1.5-flash)
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
-            
+            // 2. Direct Gemini API call with Multi-Model Fallback Sequence
+            const modelsToTry = [
+                'gemini-2.5-flash',
+                'gemini-2.0-flash',
+                'gemini-1.5-flash',
+                'gemini-1.5-pro'
+            ];
+
             const parts = [];
             if (imageBase64) {
                 const base64Clean = imageBase64.split(',')[1] || imageBase64;
@@ -522,21 +524,31 @@
             parts.push({ text: `${systemPrompt}\n\nUser Question: ${prompt || "Analyze this image and give travel advice for Brunei."}` });
 
             const payload = { contents: [{ parts: parts }] };
+            let lastErrorMessage = "";
 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            for (const model of modelsToTry) {
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                const errMsg = errData.error?.message || `HTTP ${response.status} Error`;
-                throw new Error(errMsg);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (reply) return reply;
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        lastErrorMessage = errData.error?.message || `HTTP ${response.status} (${model})`;
+                    }
+                } catch (err) {
+                    lastErrorMessage = err.message;
+                }
             }
 
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from Gemini.";
+            throw new Error(lastErrorMessage || "Unable to reach Gemini models. Please verify your API Key.");
         }
 
         function appendUserMessage(text, imageBase64) {
