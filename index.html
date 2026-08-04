@@ -543,21 +543,24 @@
             scrollToBottom();
         }
 
-        function appendBotLoading() {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex w-full justify-start';
-            wrapper.innerHTML = `
-                <div class="bot-card flex items-center gap-1.5 py-3">
-                    <span class="text-xs mr-1">Generating response</span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                </div>
-            `;
-            chatContainer.appendChild(wrapper);
-            scrollToBottom();
-            return wrapper;
-        }
+        function appendBotMessage(text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex w-full justify-start';
+    
+    // marked.js 파싱 + 치환 처리로 지저분한 문법 문자 제거
+    let formattedHtml = typeof marked !== 'undefined' ? marked.parse(text) : escapeHtml(text);
+    
+    // 혹시라도 남아있을 수 있는 ### 문구 청소
+    formattedHtml = formattedHtml.replace(/###\s?/g, '');
+
+    wrapper.innerHTML = `
+        <div class="bot-card markdown-body">
+            ${formattedHtml}
+        </div>
+    `;
+    chatContainer.appendChild(wrapper);
+    scrollToBottom();
+}
 
         function scrollToBottom() {
             chatContainer.scrollTop = chatContainer.scrollHeight;
