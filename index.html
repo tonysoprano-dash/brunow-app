@@ -452,7 +452,7 @@
             } catch (err) {
                 console.error("Chat error:", err);
                 loadingBubble.remove();
-                appendBotMessage("Sorry, I encountered an issue connecting to Gemini AI. Please check your network or API settings.");
+                appendBotMessage(err.message || "Sorry, I encountered an issue connecting to Gemini AI. Please check your network or API settings.");
             }
         }
 
@@ -476,8 +476,13 @@
                 // Vercel backend route not present in preview; fallback to direct API
             }
 
-            // 2. Direct Gemini API call (using gemini-3-flash-preview)
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+            // Check if user set an API key for client-side direct calls
+            if (!userApiKey) {
+                throw new Error("⚠️ Gemini API Key가 필요합니다. 우측 상단 ⚙️ (설정) 아이콘을 눌러 API Key를 입력 후 저장해 주세요.");
+            }
+
+            // 2. Direct Gemini API call
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
             
             const parts = [];
             if (imageBase64) {
@@ -503,7 +508,7 @@
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error?.message || `API Error: ${response.status}`);
+                throw new Error(errData.error?.message || `API Error (${response.status}): API Key가 유효한지 확인해 주세요.`);
             }
 
             const data = await response.json();
@@ -543,24 +548,21 @@
             scrollToBottom();
         }
 
-        function appendBotMessage(text) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'flex w-full justify-start';
-    
-    // marked.js 파싱 + 치환 처리로 지저분한 문법 문자 제거
-    let formattedHtml = typeof marked !== 'undefined' ? marked.parse(text) : escapeHtml(text);
-    
-    // 혹시라도 남아있을 수 있는 ### 문구 청소
-    formattedHtml = formattedHtml.replace(/###\s?/g, '');
-
-    wrapper.innerHTML = `
-        <div class="bot-card markdown-body">
-            ${formattedHtml}
-        </div>
-    `;
-    chatContainer.appendChild(wrapper);
-    scrollToBottom();
-}
+        function appendBotLoading() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex w-full justify-start';
+            wrapper.innerHTML = `
+                <div class="bot-card flex items-center gap-1.5 py-3">
+                    <span class="text-xs mr-1">Generating response</span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            scrollToBottom();
+            return wrapper;
+        }
 
         function scrollToBottom() {
             chatContainer.scrollTop = chatContainer.scrollHeight;
