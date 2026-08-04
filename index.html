@@ -478,7 +478,7 @@
         }
 
         async function callGeminiAI(prompt, imageBase64) {
-            // Use saved key or fallback to hardcoded default key
+            // Use saved key or fallback key
             const userApiKey = localStorage.getItem('gemini_api_key') || HARDCODED_BACKUP_KEY;
             const systemPrompt = "You are a warm, expert Brunei Travel Assistant. Help users plan itineraries, recommend authentic Brunei food (like Ambuyat), culture (Mosques, Kampong Ayer), and nature spots (Ulu Temburong). Keep responses concise, nicely formatted with emojis, clear bullet points, and actionable tips.";
 
@@ -498,53 +498,77 @@
                 // Fallback to direct Gemini API
             }
 
-            // 2. Direct Gemini API call (Fallback with hardcoded key)
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
-            
-            const parts = [];
-            if (imageBase64) {
-                const base64Clean = imageBase64.split(',')[1] || imageBase64;
-                parts.push({
-                    inlineData: {
-                        mimeType: "image/jpeg",
-                        data: base64Clean
+            if (!userApiKey) {
+                throw new Error("API Key가 설정되지 않았습니다. 우측 상단 ⚙️ 버튼을 눌러 API Key를 입력해 주세요.");
+            }
+
+            // Models to try in order
+            const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+            let lastError = null;
+
+            for (const model of models) {
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
+                    
+                    const parts = [];
+                    if (imageBase64) {
+                        const base64Clean = imageBase64.split(',')[1] || imageBase64;
+                        parts.push({
+                            inlineData: {
+                                mimeType: "image/jpeg",
+                                data: base64Clean
+                            }
+                        });
                     }
-                });
+                    parts.push({ text: `${systemPrompt}\n\nUser Question: ${prompt || "Analyze this image and give travel advice for Brunei."}` });
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts }] })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+
+                    if (data.error) {
+                        lastError = `[${model}] ${data.error.message || data.error.status}`;
+                    }
+                } catch (err) {
+                    lastError = err.message;
+                }
             }
-            parts.push({ text: `${systemPrompt}\n\nUser Question: ${prompt || "Analyze this image and give travel advice for Brunei."}` });
 
-            const payload = {
-                contents: [{ parts: parts }]
-            };
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error?.message || `API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from Gemini.";
+            throw new Error(lastError || "Gemini API 호출에 실패했습니다.");
         }
 
         function appendUserMessage(text, imageBase64) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex w-full justify-end';
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text && !currentBase64Image) return;
 
-            let imgHtml = imageBase64 ? `<img src="${imageBase64}" alt="user capture">` : '';
-            wrapper.innerHTML = `
-                <div class="user-bubble">
-                    ${imgHtml}
-                    ${text ? `<p>${escapeHtml(text)}</p>` : ''}
-                </div>
-            `;
-            chatContainer.appendChild(wrapper);
-            scrollToBottom();
+            appendUserMessage(text, currentBase64Image);
+
+            const promptToSend = text;
+            const imageToSend = currentBase64Image;
+
+            userInput.value = '';
+            clearImagePreview();
+
+            const loadingBubble = appendBotLoading();
+
+            try {
+                const responseText = await callGeminiAI(promptToSend, imageToSend);
+                loadingBubble.remove();
+                appendBotMessage(responseText);
+            } catch (err) {
+                console.error("Chat error:", err);
+                loadingBubble.remove();
+                appendBotMessage(`⚠️ 오류 발생:\n${err.message}\n\n💡 해결 방법:\n1. Google AI Studio(aistudio.google.com)에서 새로 발급받은 API Key를 우측 상단 ⚙️ 설정 아이콘을 눌러 입력해 보세요.`);
+            }
         }
 
         function appendBotMessage(text) {
@@ -672,7 +696,7 @@
         }
 
         const inputBoxWrapper = document.querySelector('.input-box');
-        if (inputBoxWrapper) {
+        if (inputBoxWrapper) {ㅁ
             inputBoxWrapper.addEventListener('click', () => {
                 userInput.focus();
             });
