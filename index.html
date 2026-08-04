@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Discover Brunei - Travel Assistant</title>
+    <title>Brunow Chatbot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
@@ -46,16 +46,36 @@
             }
         }
 
-        /* Header Styling */
+        /* Header Styling - Height expanded for vertical stack */
         .app-header {
-            height: 70px;
-            padding: 0 16px;
+            min-height: 82px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             background-color: #303735;
             z-index: 20;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Logo Crop Wrapper to remove outer margins naturally */
+        .logo-crop-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: transparent;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.18);
         }
 
         /* Chat Container */
@@ -145,6 +165,9 @@
             align-items: center;
             padding: 0 14px;
             height: 42px;
+            cursor: text;
+            position: relative;
+            z-index: 5;
         }
 
         .input-box input {
@@ -152,8 +175,9 @@
             border: none;
             background: transparent;
             outline: none;
-            font-size: 13px;
-            color: #111111;
+            font-size: 14px;
+            color: #111111 !important;
+            pointer-events: auto;
         }
 
         .btn-icon {
@@ -256,33 +280,27 @@
         .hidden {
             display: none !important;
         }
-
-        .input-box {
-            cursor: text;
-            position: relative;
-            z-index: 5;
-        }
-
-        .input-box input {
-            font-size: 14px;
-            color: #111111 !important;
-            pointer-events: auto;
-        }
     </style>
 </head>
 <body>
 
     <div class="app-frame">
-        <!-- Header -->
+        <!-- Header: Logo TOP, Title BOTTOM -->
         <header class="app-header">
             <button class="btn-icon" style="background: transparent;" id="backBtn" aria-label="Back">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M15 19.92L8.48 13.4C7.71 12.63 7.71 11.37 8.48 10.6L15 4.08" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
-            <div class="text-center">
-                <h1 class="font-semibold text-lg text-white tracking-tight">Brunow Chatbot</h1>
+            
+            <!-- Vertical Stack: Logo TOP, Title BOTTOM -->
+            <div class="flex flex-col items-center justify-center gap-1">
+                <div class="logo-crop-wrapper">
+                    <img src="logo.png" alt="Brunow Logo" class="logo-img" onerror="this.parentElement.style.display='none'">
+                </div>
+                <h1 class="font-semibold text-xs text-white tracking-tight leading-none">Brunow Chatbot</h1>
             </div>
+
             <button class="btn-icon" style="background: transparent;" id="settingsBtn" title="API Key Settings">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <circle cx="12" cy="12" r="3"></circle>
@@ -483,8 +501,8 @@
                 // Vercel backend route not present in preview; fallback to direct API
             }
 
-            // 2. Direct Gemini API call (using gemini-3-flash-preview)
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+            // 2. Direct Gemini API call (using gemini-2.5-flash)
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`;
             
             const parts = [];
             if (imageBase64) {
