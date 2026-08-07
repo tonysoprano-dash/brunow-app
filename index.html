@@ -517,10 +517,12 @@ STRICT RULES:
                 // Vercel serverless fallback
             }
 
-            // 2. Direct Gemini API call using updated standard models
+            // 2. Direct Gemini API call using updated active models
             const modelsToTry = [
                 'gemini-3-flash-preview',
-                'gemini-2.5-flash'
+                'gemini-3.5-flash',
+                'gemini-3-flash',
+                'gemini-1.5-flash'
             ];
 
             const parts = [];
